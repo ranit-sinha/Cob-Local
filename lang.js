@@ -38,7 +38,7 @@ var BN = {
   tutor:             "শিক্ষক",
   driver:            "ড্রাইভার",
   institutes:        "প্রতিষ্ঠান",
-  shops:             "দোকান / সংস্থা",
+  shops:             "দোকান",
   electrician:       "বিদ্যুৎ মিস্ত্রি",
   plumber:           "কল মিস্ত্রি",
   pujari:            "পুরোহিত",
