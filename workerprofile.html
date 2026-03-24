@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Provider Profile - Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="workerprofile.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="javascript:history.back()" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div class="logo-text">
+        <span class="logo-main" id="profilePageTitle" data-key="workerProfile">Provider Profile</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="share-btn" id="shareBtn" onclick="shareWorkerProfile()" style="display:none;width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:50%;color:white;font-size:16px;align-items:center;justify-content:center;">
+        <i class="fa-solid fa-share-nodes"></i>
+      </button>
+      <button class="menu-btn" onclick="openMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+      <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact Us</a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <!-- PROFILE CONTENT -->
+  <div id="profileContent">
+
+    <!-- LOADING -->
+    <div id="profileLoading">
+      <div class="profile-skeleton-photo"></div>
+      <div class="profile-skeleton-lines">
+        <div class="profile-skeleton-line long"></div>
+        <div class="profile-skeleton-line short"></div>
+        <div class="profile-skeleton-line medium"></div>
+      </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div id="profilePage" style="display:none">
+
+      <!-- PHOTO HERO -->
+      <div class="profile-hero">
+        <div class="profile-photo-wrap" id="profilePhotoWrap"></div>
+        <div class="profile-hero-info">
+          <div class="profile-name-row">
+            <h1 class="profile-name" id="profileName"></h1>
+            <button class="profile-fav-btn" id="profileFavBtn" onclick="toggleProfileFav()">
+              <i class="fa-regular fa-heart" id="profileFavIcon"></i>
+            </button>
+          </div>
+          <div class="profile-skill-row">
+            <span class="profile-skill" id="profileSkill"></span>
+            <span class="profile-verified" id="profileVerified" style="display:none">
+              <i class="fa-solid fa-circle-check"></i> Verified
+            </span>
+          </div>
+          <div class="profile-address-row" id="profileAddressRow" style="display:none">
+            <i class="fa-solid fa-location-dot" style="color:var(--primary);font-size:12px;"></i>
+            <span id="profileAddress" style="font-size:13px;color:var(--text2);font-weight:600;"></span>
+          </div>
+          <div class="profile-meta-row">
+            <span class="profile-meta-item" id="profileAge"></span>
+            <span class="profile-level" id="profileLevel"></span>
+          </div>
+          <div class="profile-avail-row">
+            <span class="profile-avail" id="profileAvail"></span>
+            <span class="profile-phone-type" id="profilePhoneType"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AADHAAR VERIFIED LINE -->
+      <div class="profile-aadhar-line" id="profileAadharLine" style="display:none">
+        <i class="fa-solid fa-id-card"></i>
+        <span data-key="aadhaarVerified">This profile is Aadhaar verified</span>
+      </div>
+
+      <!-- AADHAAR PENDING -->
+      <div id="profileAadharPending" style="display:none;margin:14px 16px 0;background:#fff8e1;border-left:3px solid #f59e0b;border-radius:10px;padding:10px 14px;font-size:12px;color:#92400e;font-weight:600;display:none;align-items:center;gap:8px;">
+        <i class="fa-solid fa-clock" style="color:#f59e0b;flex-shrink:0;"></i>
+        <span>Aadhaar verification under process. This will not take more than 24 hours.</span>
+      </div>
+
+      <!-- AADHAAR REJECTED -->
+      <div id="profileAadharRejected" style="display:none;margin:14px 16px 0;background:#fee2e2;border-left:3px solid #e74c3c;border-radius:10px;padding:10px 14px;font-size:12px;color:#991b1b;font-weight:600;display:none;align-items:center;gap:8px;">
+        <i class="fa-solid fa-circle-xmark" style="color:#e74c3c;flex-shrink:0;"></i>
+        <span>Aadhaar verification was rejected. Please re-upload from Edit Profile.</span>
+      </div>
+
+      <!-- WORKING HOURS -->
+      <div class="profile-section" id="workingHoursSection" style="display:none">
+        <div class="profile-section-label">
+          <i class="fa-solid fa-clock"></i> <span data-key="workingHours">Working Hours</span>
+        </div>
+        <div class="profile-section-value" id="profileWorkingHours"></div>
+      </div>
+
+      <!-- BIO -->
+      <div class="profile-section" id="bioSection" style="display:none">
+        <div class="profile-section-label">
+          <i class="fa-solid fa-circle-info"></i> <span data-key="about">About</span>
+        </div>
+        <div class="profile-section-value" id="profileBio"></div>
+      </div>
+
+      <!-- BUSINESS INFO -->
+      <div class="profile-section" id="profileBizInfoSection" style="display:none">
+        <div class="profile-section-label">
+          <i class="fa-solid fa-store"></i> Business Details
+        </div>
+        <div class="profile-section-value" id="profileBizInfo"></div>
+      </div>
+
+      <!-- SOCIAL LINKS -->
+      <div class="profile-section social-links-section" id="profileSocialSection" style="display:none">
+        <div class="profile-section-label">
+          <i class="fa-solid fa-share-nodes"></i> Social Media &amp; Links
+        </div>
+        <div id="profileSocialLinks"></div>
+      </div>
+
+      <!-- CONTACT BUTTONS -->
+      <div class="profile-contact-row" id="profileContactRow">
+        <a class="contact-btn call-btn" id="callBtn" href="#">
+          <i class="fa-solid fa-phone"></i>
+          <span data-key="callNow">Call Now</span>
+        </a>
+        <a class="contact-btn whatsapp-btn" id="whatsappBtn" href="#" style="display:none" target="_blank">
+          <i class="fa-brands fa-whatsapp"></i>
+          <span data-key="whatsapp">WhatsApp</span>
+        </a>
+      </div>
+
+      <!-- BASIC PHONE NOTE -->
+      <div class="profile-note" id="profileNote" style="display:none">
+        <i class="fa-solid fa-circle-info"></i>
+        This provider uses a basic phone. Call is the only way to contact.
+      </div>
+
+      <!-- RATING SUMMARY -->
+      <div class="profile-rating-section" id="ratingSummary" style="display:none">
+        <div class="rating-big-wrap">
+          <div class="rating-big-number" id="ratingNumber"></div>
+          <div class="rating-stars" id="ratingStars"></div>
+          <div class="rating-count" id="ratingCount"></div>
+        </div>
+      </div>
+
+      <!-- NO RATING YET -->
+      <div class="profile-no-rating" id="profileNoRating" style="display:none">
+        <i class="fa-regular fa-star"></i>
+        <span data-key="ratingAfter5">Rating will show after 5 reviews</span>
+      </div>
+
+      <!-- FEEDBACKS LIST -->
+      <div class="profile-feedbacks-section">
+        <div class="section-header" style="padding-top:8px">
+          <h2 data-key="reviews">Reviews</h2>
+          <span class="feedback-count-label" id="feedbackCount"></span>
+        </div>
+        <div id="feedbacksList"></div>
+      </div>
+
+      <!-- FEEDBACK CTA -->
+      <div class="profile-feedback-cta" id="feedbackCTA" style="display:none">
+        <p>Hired this provider? Rate your experience.</p>
+        <a href="#" class="feedback-cta-btn" id="feedbackCTABtn">
+          <i class="fa-solid fa-star"></i> Give Feedback
+        </a>
+      </div>
+
+    </div>
+
+    <!-- NOT FOUND -->
+    <div id="profileNotFound" style="display:none">
+      <div class="not-found-wrap">
+        <i class="fa-solid fa-user-slash not-found-icon"></i>
+        <p data-key="workerNotFound">Provider not found</p>
+        <a href="browse.html" class="back-to-browse" data-key="browseWorkersBtn">Browse Providers</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item">
+      <i class="fa-solid fa-house"></i>
+      <span data-key="home">Home</span>
+    </a>
+    <a href="browse.html" class="bnav-item">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span data-key="browse">Browse</span>
+    </a>
+    <a href="workerregister.html" class="bnav-item bnav-center">
+      <i class="fa-solid fa-plus"></i>
+      <span data-key="register">Register</span>
+    </a>
+    <a href="favourites.html" class="bnav-item">
+      <i class="fa-solid fa-heart"></i>
+      <span data-key="favourites">Favourites</span>
+    </a>
+    <a href="login.html" class="bnav-item">
+      <i class="fa-solid fa-user"></i>
+      <span data-key="login">Login</span>
+    </a>
+  </nav>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+  <script src="workerprofile.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>My Favourites - Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div class="logo-text">
+        <span class="logo-main" data-key="myFavouritesTitle">My Favourites</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="menu-btn" onclick="openMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+     <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+                <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact Us</a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <!-- COUNT BAR -->
+  <div class="fav-count-bar">
+    <span id="favCountText"></span>
+    <button class="fav-clear-btn" id="favClearBtn" onclick="clearAllFavourites()" style="display:none" data-key="clearAll">Clear All</button>
+  </div>
+
+  <!-- FAVOURITES GRID -->
+  <div class="workers-grid fav-grid" id="favGrid"></div>
+
+  <!-- EMPTY STATE -->
+  <div class="fav-empty" id="favEmpty" style="display:none">
+    <i class="fa-regular fa-heart fav-empty-icon"></i>
+    <p data-key="noFavourites">No saved providers yet</p>
+    <a href="browse.html" class="fav-browse-btn" data-key="browseWorkers">Browse Providers</a>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item">
+      <i class="fa-solid fa-house"></i>
+      <span data-key="home">Home</span>
+    </a>
+    <a href="browse.html" class="bnav-item">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span data-key="browse">Browse</span>
+    </a>
+    <a href="workerregister.html" class="bnav-item bnav-center">
+      <i class="fa-solid fa-plus"></i>
+      <span data-key="register">Register</span>
+    </a>
+    <a href="favourites.html" class="bnav-item active">
+      <i class="fa-solid fa-heart"></i>
+      <span data-key="favourites">Favourites</span>
+    </a>
+    <a href="login.html" class="bnav-item">
+      <i class="fa-solid fa-user"></i>
+      <span data-key="login">Login</span>
+    </a>
+  </nav>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+  <script src="favourites.js"></script>
+</body>
+</html>

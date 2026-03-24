@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Register as Worker - Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="workerregister.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div class="logo-text">
+        <span class="logo-main" data-key="registerWorker">Register as Provider</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="menu-btn" onclick="openMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+     <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+                <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact Us</a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <div class="reg-wrap">
+
+    <!-- STEP INDICATOR -->
+    <div class="step-bar">
+      <div class="step-item active" id="stepDot1">
+        <div class="step-dot">1</div>
+        <div class="step-lbl" data-key="stepBasic">Basic</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item" id="stepDot2">
+        <div class="step-dot">2</div>
+        <div class="step-lbl" data-key="stepSkill">Service</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item" id="stepDot3">
+        <div class="step-dot">3</div>
+        <div class="step-lbl" data-key="stepContact">Contact</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-item" id="stepDot4">
+        <div class="step-dot">4</div>
+        <div class="step-lbl" data-key="stepPhoto">Photo</div>
+      </div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="reg-step" id="step1">
+      <h2 class="step-title">Who are you registering?</h2>
+
+      <!-- PROVIDER TYPE SELECTOR -->
+      <div class="field-group">
+        <label class="field-label">Provider Type</label>
+        <div style="display:flex;gap:10px;margin-bottom:6px;">
+          <button type="button" id="typeWorkerBtn" class="type-select-btn type-active" onclick="selectProviderType('worker')">
+            <i class="fa-solid fa-hammer"></i>
+            <span>Individual</span>
+          </button>
+          <button type="button" id="typeBusinessBtn" class="type-select-btn" onclick="selectProviderType('business')">
+            <i class="fa-solid fa-store"></i>
+            <span>Business</span>
+          </button>
+        </div>
+        <span class="field-hint" id="providerTypeHint">Single person providing a service (plumber, tutor, driver, etc.)</span>
+      </div>
+
+
+
+      <div class="field-group">
+        <label class="field-label" id="nameLabel" data-key="fullName">Full Name</label>
+        <input class="field-input" type="text" id="regName" maxlength="60" placeholder="Enter your full name">
+        <span class="field-err" id="errName"></span>
+      </div>
+
+      <!-- WORKER-ONLY FIELDS -->
+      <div id="workerOnlyFields">
+        <div class="field-group">
+          <label class="field-label" data-key="age">Age</label>
+          <input class="field-input" type="number" id="regAge" min="16" max="80" placeholder="Your age">
+          <span class="field-err" id="errAge"></span>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" data-key="gender">Gender</label>
+          <div class="radio-row">
+            <label class="radio-item"><input type="radio" name="regGender" value="Male"> <span data-key="male">Male</span></label>
+            <label class="radio-item"><input type="radio" name="regGender" value="Female"> <span data-key="female">Female</span></label>
+            <label class="radio-item"><input type="radio" name="regGender" value="Other"> <span data-key="other">Other</span></label>
+          </div>
+          <span class="field-err" id="errGender"></span>
+        </div>
+      </div>
+
+      <!-- BUSINESS-ONLY FIELDS -->
+      <div id="businessOnlyFields" style="display:none">
+        <div class="field-group">
+          <label class="field-label">Contact Person Name</label>
+          <input class="field-input" type="text" id="regContactPerson" maxlength="60" placeholder="Name of contact person">
+          <span class="field-err" id="errContactPerson"></span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" data-key="aboutYou">About / Description</label>
+        <textarea class="field-input field-textarea" id="regBio" maxlength="200" rows="3" placeholder="Briefly describe your experience or business..."></textarea>
+        <span class="field-hint" id="bioCount">0 / 200</span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Address</label>
+        <input class="field-input" type="text" id="regAddress" maxlength="120" placeholder="e.g. Near Town Hall, Sunity Road, Coochbehar">
+        <span class="field-hint">Help customers know if you are near them</span>
+        <span class="field-err" id="errAddress"></span>
+      </div>
+
+      <button class="reg-btn-primary" type="button" onclick="goStep(2)" data-key="next">Next</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="reg-step" id="step2" style="display:none">
+      <h2 class="step-title" data-key="skillInfo">Service Information</h2>
+
+      <div class="field-group" id="businessTypeGroup" style="display:none">
+        <label class="field-label">Business Category</label>
+        <select class="field-input field-select" id="regBusinessCategory" onchange="handleBusinessCategoryChange()">
+          <option value="">-- Select Category --</option>
+          <option value="Shop">Shop</option>
+          <option value="Agency">Agency</option>
+          <option value="Institute">Institute</option>
+        </select>
+        <span class="field-err" id="errBusinessCategory"></span>
+      </div>
+
+      <div class="field-group" id="businessSubTypeGroup" style="display:none">
+        <label class="field-label">Specific Type</label>
+        <select class="field-input field-select" id="regBusinessSubType" onchange="handleBusinessSubTypeChange()">
+          <option value="">-- Select --</option>
+        </select>
+        <span class="field-err" id="errBusinessSubType"></span>
+      </div>
+
+      <div class="field-group" id="businessOtherSubGroup" style="display:none">
+        <label class="field-label">Specify Your Business Type</label>
+        <input class="field-input" type="text" id="regBusinessOtherSub" maxlength="50" placeholder="e.g. Grocery Shop, Tailoring Shop">
+        <span class="field-err" id="errBusinessOtherSub"></span>
+      </div>
+
+      <div class="field-group" id="workerServiceGroup">
+        <label class="field-label" data-key="yourSkill">Your Service</label>
+        <select class="field-input field-select" id="regSkill" onchange="handleSkillChange()">
+          <option value="">-- Select Service --</option>
+          <option value="Tutor">Tutor</option>
+          <option value="Driver">Driver</option>
+          <option value="Institutes">Institutes</option>
+          <option value="Shops">Shops / Agencies</option>
+          <option value="Electrician">Electrician</option>
+          <option value="Plumber">Plumber</option>
+          <option value="Pujari">Pujari</option>
+          <option value="Others">Others</option>
+        </select>
+        <span class="field-err" id="errSkill"></span>
+      </div>
+
+      <div class="field-group" id="subSkillGroup" style="display:none">
+        <label class="field-label" data-key="subSkill">Sub category</label>
+        <select class="field-input field-select" id="regSubSkill">
+          <option value="">-- Select --</option>
+        </select>
+      </div>
+
+      <div class="field-group" id="otherSkillGroup" style="display:none">
+        <label class="field-label" data-key="specifySkill">Specify Your Service</label>
+        <input class="field-input" type="text" id="regOtherSkill" maxlength="50" placeholder="e.g. AC Technician">
+        <span class="field-err" id="errOtherSkill"></span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" data-key="workingHours">Working Hours</label>
+        <input class="field-input" type="text" id="regHours" maxlength="60" placeholder="e.g. 8am - 6pm, Mon to Sat">
+        <span class="field-err" id="errHours"></span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" data-key="availability">Availability</label>
+        <div class="toggle-row-field">
+          <span data-key="currentlyAvailable">Currently Available</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="regAvailable" checked>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="step-btn-row">
+        <button class="reg-btn-secondary" type="button" onclick="goStep(1)" data-key="back">Back</button>
+        <button class="reg-btn-primary" type="button" onclick="goStep(3)" data-key="next">Next</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="reg-step" id="step3" style="display:none">
+      <h2 class="step-title" data-key="contactInfo">Contact Information</h2>
+
+      <div class="field-group">
+        <label class="field-label" data-key="mobileNumber">Mobile Number</label>
+        <div class="phone-row">
+          <span class="phone-prefix">+91</span>
+          <input class="field-input phone-input" type="tel" id="regPhone" maxlength="10" inputmode="numeric" placeholder="10-digit number">
+        </div>
+        <span class="field-err" id="errPhone"></span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" data-key="phoneType">Phone Type</label>
+        <div class="radio-row">
+          <label class="radio-item"><input type="radio" name="regPhoneType" value="smartphone" checked> <span data-key="smartphone">Smartphone</span></label>
+          <label class="radio-item"><input type="radio" name="regPhoneType" value="basic"> <span data-key="basicPhone">Basic Phone</span></label>
+        </div>
+      </div>
+
+      <div class="field-group" id="whatsappGroup">
+        <label class="field-label" data-key="hasWhatsApp">Has WhatsApp?</label>
+        <div class="toggle-row-field">
+          <span data-key="whatsAppOnSameNumber">WhatsApp on same number</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="regWhatsapp" checked>
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" data-key="setPassword">Set Password</label>
+        <div class="pw-wrap">
+          <input class="field-input" type="password" id="regPw" maxlength="40" placeholder="Create a password">
+          <button class="pw-eye" onclick="toggleRegPw('regPw','rEye1')" type="button">
+            <i class="fa-regular fa-eye" id="rEye1"></i>
+          </button>
+        </div>
+        <span class="field-hint" data-key="pwHint">At least 6 characters</span>
+        <span class="field-err" id="errPw"></span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" data-key="confirmPassword">Confirm Password</label>
+        <div class="pw-wrap">
+          <input class="field-input" type="password" id="regPw2" maxlength="40" placeholder="Repeat your password">
+          <button class="pw-eye" onclick="toggleRegPw('regPw2','rEye2')" type="button">
+            <i class="fa-regular fa-eye" id="rEye2"></i>
+          </button>
+        </div>
+        <span class="field-err" id="errPw2"></span>
+      </div>
+
+      <div class="step-btn-row">
+        <button class="reg-btn-secondary" type="button" onclick="goStep(2)" data-key="back">Back</button>
+        <button class="reg-btn-primary" type="button" onclick="goStep(4)" data-key="next">Next</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="reg-step" id="step4" style="display:none">
+      <h2 class="step-title" data-key="photoAadhaar">Photo and Aadhaar</h2>
+
+      <div class="field-group">
+        <label class="field-label" data-key="profilePhoto">Profile Photo</label>
+        <div class="photo-upload-box" id="photoBox" onclick="document.getElementById('regPhotoInput').click()">
+          <img id="photoPreview" src="" alt="" style="display:none">
+          <div class="photo-upload-placeholder" id="photoPlaceholder">
+            <i class="fa-solid fa-camera"></i>
+            <span data-key="tapToUpload">Tap to upload photo</span>
+          </div>
+        </div>
+        <input type="file" id="regPhotoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
+        <span class="field-hint" data-key="photoHint">Clear face photo. Max 2MB.</span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label"><i class="fa-solid fa-share-nodes"></i> Social Media Links <span style="color:var(--text3);font-size:11px;font-weight:600;">(optional)</span></label>
+        <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;" id="socialTagsContainer"></div>
+        <div class="social-link-add-row">
+          <select class="social-platform-select" id="socialPlatform">
+            <option value="Instagram">Instagram</option>
+            <option value="Facebook">Facebook</option>
+            <option value="YouTube">YouTube</option>
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Website">Website</option>
+            <option value="Other">Other</option>
+          </select>
+          <input class="social-link-input" type="url" id="socialLinkInput" placeholder="Paste link here">
+          <button type="button" class="social-add-btn" onclick="addSocialLink()">Add</button>
+        </div>
+        <span class="field-hint">Tap Add after entering each link</span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" id="aadhaarCardLabel" data-key="aadhaarCard">Aadhaar Card (optional)</label>
+        <div class="doc-upload-box" id="aadhaarBox" onclick="document.getElementById('regAadhaarInput').click()">
+          <i class="fa-solid fa-id-card doc-upload-icon" id="aadhaarIcon"></i>
+          <span class="doc-upload-label" id="aadhaarLabel" data-key="tapToUploadDoc">Tap to upload Aadhaar</span>
+        </div>
+        <input type="file" id="regAadhaarInput" accept="image/*,application/pdf" style="display:none" onchange="handleAadhaarUpload(this)">
+        <span class="field-hint" data-key="aadhaarHint">Adds a Verified badge to your profile.</span>
+      </div>
+
+      <div class="reg-terms">
+        <label class="checkbox-item">
+          <input type="checkbox" id="regTerms">
+          <span data-key="agreeTerms">I confirm that all information provided is accurate and true.</span>
+        </label>
+        <span class="field-err" id="errTerms"></span>
+      </div>
+
+      <div class="step-btn-row">
+        <button class="reg-btn-secondary" type="button" onclick="goStep(3)" data-key="back">Back</button>
+        <button class="reg-btn-accent" type="button" onclick="submitRegistration()" data-key="registerNow">Register Now</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="reg-step reg-success" id="stepSuccess" style="display:none">
+      <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <h2 class="success-title" data-key="regSuccess">Registration Successful!</h2>
+      <p class="success-sub" data-key="regSuccessSub">Your profile is created. Login to manage your availability.</p>
+      <a href="workerlogin.html" class="reg-btn-primary" style="display:block;text-align:center;margin-bottom:10px" data-key="workerLogin">Provider Login</a>
+      <a href="index.html" class="reg-btn-secondary" style="display:block;text-align:center" data-key="home">Go Home</a>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item">
+      <i class="fa-solid fa-house"></i>
+      <span data-key="home">Home</span>
+    </a>
+    <a href="browse.html" class="bnav-item">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span data-key="browse">Browse</span>
+    </a>
+    <a href="workerregister.html" class="bnav-item bnav-center active">
+      <i class="fa-solid fa-plus"></i>
+      <span data-key="register">Register</span>
+    </a>
+    <a href="favourites.html" class="bnav-item">
+      <i class="fa-solid fa-heart"></i>
+      <span data-key="favourites">Favourites</span>
+    </a>
+    <a href="login.html" class="bnav-item">
+      <i class="fa-solid fa-user"></i>
+      <span data-key="login">Login</span>
+    </a>
+  </nav>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+  <script src="workerregister.js"></script>
+</body>
+</html>

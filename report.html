@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Report an Issue - Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="workerregister.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="javascript:history.back()" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="logo-text">
+        <span class="logo-main">Report an Issue</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="menu-btn" onclick="openMenu()"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+     <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact Us</a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <!-- NOT LOGGED IN -->
+  <div id="notLoggedInReport" style="display:none">
+    <div class="fav-empty">
+      <i class="fa-solid fa-lock fav-empty-icon"></i>
+      <p>Please login to report an issue</p>
+      <a href="login.html" class="fav-browse-btn">Login</a>
+    </div>
+  </div>
+
+   <!-- REPORT FORM -->
+  <div class="reg-wrap" id="reportFormWrap" style="display:none">
+
+    <div style="background:#fff8e1; border-left:3px solid #f59e0b; border-radius:10px; padding:12px 14px; margin-bottom:20px; font-size:13px; color:#92400e; font-weight:600;">
+      Please provide as much detail as possible so we can resolve the issue quickly.
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Issue Type</label>
+      <select class="field-input field-select" id="reportType">
+        <option value="Profile Issue">Profile Issue</option>
+        <option value="Fake Profile">Fake / Spam Profile</option>
+        <option value="Wrong Information">Wrong Information</option>
+        <option value="App Bug">App Bug</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Related Profile</label>
+      <input class="field-input" type="text" id="reportProfileId" placeholder="Profile name or ID (if reporting a profile)">
+      <span class="field-hint">Leave blank if this is a general app issue</span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Describe the Issue</label>
+      <textarea class="field-input field-textarea" id="reportDescription" maxlength="500" rows="5" placeholder="Describe the issue in detail..."></textarea>
+      <span class="field-hint" id="reportDescCount">0 / 500</span>
+      <span class="field-err" id="errReportDesc"></span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Attach Screenshots <span style="color:var(--text3);font-size:11px;font-weight:600;">(max 3)</span></label>
+      <div id="screenshotPreviews" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
+      <div class="doc-upload-box" id="screenshotBox" onclick="triggerScreenshot()">
+        <i class="fa-solid fa-image doc-upload-icon" id="screenshotIcon"></i>
+        <span class="doc-upload-label" id="screenshotLabel">Tap to attach screenshots</span>
+      </div>
+      <input type="file" id="screenshotInput" accept="image/*" style="display:none" onchange="handleScreenshots(this)">
+      <span class="field-hint">Images will help us understand the issue faster</span>
+    </div>
+
+    <span class="field-err" id="errReport"></span>
+    <button class="reg-btn-accent" type="button" onclick="submitReport()">
+      <i class="fa-solid fa-paper-plane"></i> Submit Report
+    </button>
+
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="reg-wrap" id="reportSuccess" style="display:none">
+    <div class="reg-success">
+      <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <h2 class="success-title">Report Submitted!</h2>
+      <p class="success-sub">Your report has been received. We will review it and get back to you as soon as possible.</p>
+      <a href="index.html" class="reg-btn-primary" style="display:block;text-align:center;margin-bottom:10px">Go Home</a>
+      <a href="javascript:history.back()" class="reg-btn-secondary" style="display:block;text-align:center">Go Back</a>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item"><i class="fa-solid fa-house"></i><span data-key="home">Home</span></a>
+    <a href="browse.html" class="bnav-item"><i class="fa-solid fa-magnifying-glass"></i><span data-key="browse">Browse</span></a>
+    <a href="workerregister.html" class="bnav-item bnav-center"><i class="fa-solid fa-plus"></i><span data-key="register">Register</span></a>
+    <a href="favourites.html" class="bnav-item"><i class="fa-solid fa-heart"></i><span data-key="favourites">Favourites</span></a>
+    <a href="login.html" class="bnav-item"><i class="fa-solid fa-user"></i><span data-key="login">Login</span></a>
+  </nav>
+  
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+  <script>
+    var reportScreenshots = [];
+
+    document.addEventListener("DOMContentLoaded", function() {
+      /* Check login */
+      var workerSession = localStorage.getItem("ctj_worker_session");
+      var hirerSession  = localStorage.getItem("ctj_hirer_session");
+      if (!workerSession && !hirerSession) {
+        document.getElementById("notLoggedInReport").style.display = "block";
+        return;
+      }
+      document.getElementById("reportFormWrap").style.display = "block";
+
+      /* Description counter */
+      var descEl  = document.getElementById("reportDescription");
+      var countEl = document.getElementById("reportDescCount");
+      descEl.addEventListener("input", function() {
+        countEl.textContent = descEl.value.length + " / 500";
+      });
+    });
+
+    function triggerScreenshot() {
+      if (reportScreenshots.length >= 3) {
+        showToast("Maximum 3 screenshots allowed");
+        return;
+      }
+      var input = document.getElementById("screenshotInput");
+      input.value = "";
+      input.click();
+    }
+
+    function handleScreenshots(input) {
+      if (!input.files || !input.files.length) return;
+      var file = input.files[0];
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        reportScreenshots.push(e.target.result);
+        renderScreenshotPreviews();
+      };
+      reader.readAsDataURL(file);
+      input.value = "";
+    }
+
+    function renderScreenshotPreviews() {
+      var container = document.getElementById("screenshotPreviews");
+      container.innerHTML = reportScreenshots.map(function(src, i) {
+        return '<div style="position:relative;width:80px;height:80px;">'
+          + '<img src="' + src + '" style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:1.5px solid var(--border);">'
+          + '<button type="button" onclick="removeScreenshot(' + i + ')" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:#e74c3c;color:white;border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;">✕</button>'
+          + '</div>';
+      }).join("");
+      if (reportScreenshots.length >= 3) {
+        document.getElementById("screenshotBox").style.display = "none";
+      }
+      document.getElementById("screenshotLabel").textContent = reportScreenshots.length + " screenshot" + (reportScreenshots.length !== 1 ? "s" : "") + " added";
+      if (reportScreenshots.length > 0) document.getElementById("screenshotBox").classList.add("uploaded");
+    }
+
+    function removeScreenshot(idx) {
+      reportScreenshots.splice(idx, 1);
+      var box = document.getElementById("screenshotBox");
+      box.style.display = "flex";
+      if (reportScreenshots.length === 0) {
+        box.classList.remove("uploaded");
+        document.getElementById("screenshotLabel").textContent = "Tap to attach screenshots";
+      }
+      renderScreenshotPreviews();
+    }
+
+    async function submitReport() {
+      var desc = document.getElementById("reportDescription").value.trim();
+      document.getElementById("errReportDesc").textContent = "";
+      document.getElementById("errReport").textContent = "";
+      if (!desc || desc.length < 10) {
+        document.getElementById("errReportDesc").textContent = "Please describe the issue (at least 10 characters)";
+        return;
+      }
+
+      var submitBtn = document.querySelector(".reg-btn-accent");
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Submitting..."; }
+
+      var workerSession = localStorage.getItem("ctj_worker_session");
+      var hirerSession  = localStorage.getItem("ctj_hirer_session");
+      var reporterType  = workerSession ? "provider" : "customer";
+      var reporterId    = workerSession || hirerSession;
+      var reportId      = "rpt_" + Date.now();
+
+      /* Upload screenshots to Supabase Storage */
+      var screenshotUrls = [];
+      for (var i = 0; i < reportScreenshots.length; i++) {
+        var path = "reports/" + reportId + "/screen" + i + ".jpg";
+        var url = await window.supabaseUploadPhoto(path, reportScreenshots[i], "image/jpeg");
+        if (url) screenshotUrls.push(url);
+      }
+
+      try {
+        await window.firestoreAddDoc(
+          window.firestoreCollection(window.firebaseDb, "reports"),
+          {
+            id:           reportId,
+            reporterType: reporterType,
+            reporterId:   reporterId,
+            type:         document.getElementById("reportType").value,
+            profileId:    document.getElementById("reportProfileId").value.trim(),
+            description:  desc,
+            screenshots:  screenshotUrls,
+            status:       "pending",
+            adminReply:   "",
+            date:         Date.now()
+          }
+        );
+
+        document.getElementById("reportFormWrap").style.display = "none";
+        document.getElementById("reportSuccess").style.display  = "block";
+
+      } catch(err) {
+        console.error("submitReport error:", err);
+        document.getElementById("errReport").textContent = "Failed to submit. Please try again.";
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Submit Report"; }
+      }
+    }
+  </script>
+</body>
+</html>

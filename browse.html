@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Browse Workers - Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="browse.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div class="logo-text">
+        <span class="logo-main" data-key="browseTitle">Browse Providers</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="menu-btn" onclick="openMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+     <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+                <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact Us</a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <!-- SEARCH BAR -->
+  <div class="browse-search-wrap">
+    <div class="search-box">
+      <input type="text" id="browseSearchInput" data-key-placeholder="searchPlaceholder" placeholder="Search by name or skill..." oninput="handleBrowseSearch(this.value)">
+      <button class="search-btn" onclick="handleBrowseSearch(document.getElementById('browseSearchInput').value)">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- SKILL FILTER TABS -->
+  <div class="skill-tabs-wrap">
+    <div class="skill-tabs" id="skillTabs">
+      <button class="skill-tab active" data-skill="all" data-key="all" onclick="filterSkill('all')">All</button>
+      <button class="skill-tab" data-skill="Tutor" data-key="tutor" onclick="toggleSubTabs('Tutor')">Tutor</button>
+      <button class="skill-tab" data-skill="Driver" data-key="driver" onclick="toggleSubTabs('Driver')">Driver</button>
+      <button class="skill-tab" data-skill="Institutes" data-key="institutes" onclick="toggleSubTabs('Institutes')">Institutes</button>
+      <button class="skill-tab" data-skill="Shops" data-key="shops" onclick="toggleSubTabs('Shops')">Shops / Agencies</button>
+      <button class="skill-tab" data-skill="Electrician" data-key="electrician" onclick="filterSkill('Electrician')">Electrician</button>
+      <button class="skill-tab" data-skill="Plumber" data-key="plumber" onclick="filterSkill('Plumber')">Plumber</button>
+      <button class="skill-tab" data-skill="Pujari" data-key="pujari" onclick="filterSkill('Pujari')">Pujari</button>
+      <button class="skill-tab" data-skill="Others" data-key="others" onclick="filterSkill('Others')">Others</button>
+    </div>
+  </div>
+  <!-- SUB TABS -->
+  <div class="sub-tabs-wrap" id="subTabsWrap" style="display:none">
+    <div class="sub-tabs" id="subTabs"></div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <button class="filter-btn active" id="filterAll" onclick="filterPhone('all')">All</button>
+    <button class="filter-btn" id="filterSmp" onclick="filterPhone('smartphone')">
+      <i class="fa-solid fa-mobile-screen"></i> Smartphone
+    </button>
+    <button class="filter-btn" id="filterNosmp" onclick="filterPhone('basic')">
+      <i class="fa-solid fa-phone"></i> Basic Phone
+    </button>
+    <button class="filter-btn" id="filterVerified" onclick="filterPhone('verified')">
+      <i class="fa-solid fa-circle-check"></i> Verified
+    </button>
+    <select class="sort-select" id="sortSelect" onchange="handleSort(this.value)">
+      <option value="default">Sort: Default</option>
+      <option value="rating">Top Rated</option>
+      <option value="level">Highest Level</option>
+      <option value="newest">Newest</option>
+      <option value="available">Available Now</option>
+    </select>
+  </div>
+
+  <!-- RESULTS COUNT -->
+  <div class="results-count" id="resultsCount">Showing all providers</div>
+
+  <!-- WORKERS GRID -->
+  <div class="workers-grid browse-grid" id="browseGrid">
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+    <div class="skeleton-card"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item">
+      <i class="fa-solid fa-house"></i>
+      <span data-key="home">Home</span>
+    </a>
+    <a href="browse.html" class="bnav-item active">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span data-key="browse">Browse</span>
+    </a>
+    <a href="workerregister.html" class="bnav-item bnav-center">
+      <i class="fa-solid fa-plus"></i>
+      <span data-key="register">Register</span>
+    </a>
+    <a href="favourites.html" class="bnav-item">
+      <i class="fa-solid fa-heart"></i>
+      <span data-key="favourites">Favourites</span>
+    </a>
+    <a href="login.html" class="bnav-item">
+      <i class="fa-solid fa-user"></i>
+      <span data-key="login">Login</span>
+    </a>
+  </nav>
+  
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+  <script src="browse.js"></script>
+  
+</body>
+</html>

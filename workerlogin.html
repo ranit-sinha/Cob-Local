@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Provider Login - Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="login.html" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div class="logo-text">
+        <span class="logo-main" data-key="workerLogin">Provider Login</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="menu-btn" onclick="openMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+     <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+            <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact Us</a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <div class="auth-wrap">
+
+    <div class="auth-logo">
+      <div class="auth-icon-wrap worker-icon-bg">
+        <i class="fa-solid fa-hammer"></i>
+      </div>
+      <p class="auth-logo-sub" data-key="workerPortal">Provider Portal</p>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="auth-card" id="loginCard">
+      <h2 class="auth-title" data-key="loginToAccount">Login to Your Account</h2>
+
+      <div class="field-group">
+        <label class="field-label" data-key="mobileNumber">Mobile Number</label>
+        <div class="phone-row">
+          <span class="phone-prefix">+91</span>
+          <input class="field-input phone-input" type="tel" id="loginPhone"
+                 maxlength="10" inputmode="numeric" placeholder="10-digit number">
+        </div>
+        <span class="field-err" id="errPhone"></span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" data-key="password">Password</label>
+        <div class="pw-wrap">
+          <input class="field-input" type="password" id="loginPw" maxlength="40" placeholder="Enter your password">
+          <button class="pw-eye" onclick="togglePw('loginPw','eyeIcon')" type="button">
+            <i class="fa-regular fa-eye" id="eyeIcon"></i>
+          </button>
+        </div>
+        <span class="field-err" id="errPw"></span>
+      </div>
+
+      <span class="field-err auth-general-err" id="errGeneral"></span>
+
+      <button class="auth-submit-btn" type="button" onclick="submitWorkerLogin()" data-key="login">Login</button>
+
+      <p class="auth-switch">
+        <span data-key="noAccountYet">Not registered yet?</span>
+        <a href="workerregister.html" data-key="registerNow">Register Now</a>
+      </p>
+    </div>
+
+    <!-- DASHBOARD (shown after login) -->
+    <div class="auth-card worker-dashboard" id="workerDashboard" style="display:none">
+      <div class="dashboard-header">
+        <div class="dashboard-photo" id="dashPhoto"></div>
+        <div>
+          <div class="dashboard-name" id="dashName"></div>
+          <div class="dashboard-skill" id="dashSkill"></div>
+        </div>
+      </div>
+
+      <div class="dash-toggle-row">
+        <span data-key="currentlyAvailable">Currently Available</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="dashAvailable" onchange="updateAvailability()">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+
+      <div class="dash-stats">
+        <div class="dash-stat-item">
+          <div class="dash-stat-val" id="dashRating">-</div>
+          <div class="dash-stat-lbl" data-key="rating">Rating</div>
+        </div>
+        <div class="dash-stat-item">
+          <div class="dash-stat-val" id="dashReviews">0</div>
+          <div class="dash-stat-lbl" data-key="reviews">Reviews</div>
+        </div>
+        <div class="dash-stat-item">
+          <div class="dash-stat-val" id="dashLevel">1</div>
+          <div class="dash-stat-lbl" data-key="level">Level</div>
+        </div>
+      </div>
+
+      <a class="auth-submit-btn view-profile-btn" id="viewProfileBtn" href="#" data-key="viewMyProfile">View My Profile</a>
+      <a class="auth-submit-btn" href="editprofile.html" style="background:var(--surface2);color:var(--primary);margin-bottom:12px;" data-key="editProfile">Edit Profile</a>
+
+      <button class="logout-btn" onclick="logoutWorker()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span data-key="logout">Logout</span>
+      </button>
+
+      <button class="logout-btn" style="margin-top:10px;border-color:#c0392b;color:#c0392b;" onclick="showDeleteWorkerModal()">
+        <i class="fa-solid fa-trash"></i>
+        <span>Delete My Provider Profile</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- DELETE WORKER MODAL -->
+  <div id="deleteWorkerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--surface);border-radius:var(--radius);padding:24px 20px;max-width:360px;width:100%;box-shadow:var(--shadow-md);">
+      <div style="text-align:center;margin-bottom:16px;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size:40px;color:#e74c3c;"></i>
+      </div>
+      <h3 style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:8px;text-align:center;">Delete Provider Profile?</h3>
+      <p style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:20px;line-height:1.5;">This will permanently delete your provider profile and all your data. Your phone number will be free to register again. This cannot be undone.</p>
+      <div class="field-group">
+        <label class="field-label">Enter your password to confirm</label>
+        <input class="field-input" type="password" id="deleteWorkerPw" placeholder="Your password">
+        <span class="field-err" id="deleteWorkerErr"></span>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button type="button" onclick="hideDeleteWorkerModal()" style="flex:1;padding:12px;border-radius:var(--radius);background:var(--surface2);color:var(--text2);font-size:14px;font-weight:700;border:1.5px solid var(--border);">Cancel</button>
+        <button type="button" onclick="confirmDeleteWorker()" style="flex:1;padding:12px;border-radius:var(--radius);background:#e74c3c;color:white;font-size:14px;font-weight:700;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item">
+      <i class="fa-solid fa-house"></i>
+      <span data-key="home">Home</span>
+    </a>
+    <a href="browse.html" class="bnav-item">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span data-key="browse">Browse</span>
+    </a>
+    <a href="workerregister.html" class="bnav-item bnav-center">
+      <i class="fa-solid fa-plus"></i>
+      <span data-key="register">Register</span>
+    </a>
+    <a href="favourites.html" class="bnav-item">
+      <i class="fa-solid fa-heart"></i>
+      <span data-key="favourites">Favourites</span>
+    </a>
+    <a href="login.html" class="bnav-item active">
+      <i class="fa-solid fa-user"></i>
+      <span data-key="login">Login</span>
+    </a>
+  </nav>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+  <script src="workerlogin.js"></script>
+</body>
+</html>

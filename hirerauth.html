@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Customer Login - Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="login.html" class="back-btn">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div class="logo-text">
+        <span class="logo-main" data-key="hirerLogin">Customer Login</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="menu-btn" onclick="openMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+     <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+                <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact Us</a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <div class="auth-wrap">
+
+    <div class="auth-logo">
+      <div class="auth-icon-wrap hirer-icon-bg">
+        <i class="fa-solid fa-user-tie"></i>
+      </div>
+      <p class="auth-logo-sub" data-key="hirerPortal">Customer Portal</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="auth-tabs" id="authTabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')" data-key="login">Login</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')" data-key="signUp">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="auth-card" id="loginCard">
+      <div class="field-group">
+        <label class="field-label" data-key="mobileNumber">Mobile Number</label>
+        <div class="phone-row">
+          <span class="phone-prefix">+91</span>
+          <input class="field-input phone-input" type="tel" id="hLoginPhone" maxlength="10" inputmode="numeric" placeholder="10-digit number">
+        </div>
+        <span class="field-err" id="hLoginErrPhone"></span>
+      </div>
+      <div class="field-group">
+        <label class="field-label" data-key="password">Password</label>
+        <div class="pw-wrap">
+          <input class="field-input" type="password" id="hLoginPw" maxlength="40" placeholder="Enter your password">
+          <button class="pw-eye" onclick="togglePw('hLoginPw','eye1')" type="button">
+            <i class="fa-regular fa-eye" id="eye1"></i>
+          </button>
+        </div>
+        <span class="field-err" id="hLoginErrPw"></span>
+      </div>
+      <span class="field-err auth-general-err" id="hLoginErrGeneral"></span>
+      <button class="auth-submit-btn" type="button" onclick="submitHirerLogin()" data-key="login">Login</button>
+      <p class="auth-switch">
+        <span data-key="noAccountYet">No account yet?</span>
+        <a href="#" onclick="switchTab('signup')" data-key="signUp">Sign Up</a>
+      </p>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div class="auth-card" id="signupCard" style="display:none">
+      <div class="field-group">
+        <label class="field-label" data-key="fullName">Full Name</label>
+        <input class="field-input" type="text" id="hSignupName" maxlength="60" placeholder="Enter your full name">
+        <span class="field-err" id="hSignupErrName"></span>
+      </div>
+      <div class="field-group">
+        <label class="field-label" data-key="mobileNumber">Mobile Number</label>
+        <div class="phone-row">
+          <span class="phone-prefix">+91</span>
+          <input class="field-input phone-input" type="tel" id="hSignupPhone" maxlength="10" inputmode="numeric" placeholder="10-digit number">
+        </div>
+        <span class="field-err" id="hSignupErrPhone"></span>
+      </div>
+      <div class="field-group">
+        <label class="field-label" data-key="setPassword">Set Password</label>
+        <div class="pw-wrap">
+          <input class="field-input" type="password" id="hSignupPw" maxlength="40" placeholder="Create a password">
+          <button class="pw-eye" onclick="togglePw('hSignupPw','eye2')" type="button">
+            <i class="fa-regular fa-eye" id="eye2"></i>
+          </button>
+        </div>
+        <span class="field-hint" data-key="pwHint">At least 6 characters</span>
+        <span class="field-err" id="hSignupErrPw"></span>
+      </div>
+      <div class="field-group">
+        <label class="field-label" data-key="confirmPassword">Confirm Password</label>
+        <div class="pw-wrap">
+          <input class="field-input" type="password" id="hSignupPw2" maxlength="40" placeholder="Repeat your password">
+          <button class="pw-eye" onclick="togglePw('hSignupPw2','eye3')" type="button">
+            <i class="fa-regular fa-eye" id="eye3"></i>
+          </button>
+        </div>
+        <span class="field-err" id="hSignupErrPw2"></span>
+      </div>
+      <span class="field-err auth-general-err" id="hSignupErrGeneral"></span>
+      <button class="auth-submit-btn" type="button" onclick="submitHirerSignup()" data-key="signUp">Sign Up</button>
+      <p class="auth-switch">
+        <span data-key="alreadyHaveAccount">Already have an account?</span>
+        <a href="#" onclick="switchTab('login')" data-key="login">Login</a>
+      </p>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="auth-card hirer-dashboard" id="hirerDashboard" style="display:none">
+      <div class="dashboard-header">
+        <div class="dashboard-photo hirer-avatar" id="hirerAvatar" style="overflow:hidden;"></div>
+        <div>
+          <div class="dashboard-name" id="hirerDashName"></div>
+          <div class="dashboard-skill" data-key="hirerLabel">Customer</div>
+        </div>
+      </div>
+      <div class="dash-links">
+        <a href="editprofile.html" class="dash-link-btn">
+          <i class="fa-solid fa-pen"></i>
+          <span data-key="editProfile">Edit Profile</span>
+        </a>
+        <a href="browse.html" class="dash-link-btn">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span data-key="browseWorkers">Browse Providers</span>
+        </a>
+        <a href="favourites.html" class="dash-link-btn">
+          <i class="fa-solid fa-heart"></i>
+          <span data-key="myFavourites">My Favourites</span>
+        </a>
+      </div>
+      <button class="logout-btn" onclick="logoutHirer()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span data-key="logout">Logout</span>
+      </button>
+
+      <button class="logout-btn" style="margin-top:10px;border-color:#c0392b;color:#c0392b;" onclick="showDeleteHirerModal()">
+        <i class="fa-solid fa-trash"></i>
+        <span>Delete My Customer Profile</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- DELETE HIRER MODAL -->
+  <div id="deleteHirerModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--surface);border-radius:var(--radius);padding:24px 20px;max-width:360px;width:100%;box-shadow:var(--shadow-md);">
+      <div style="text-align:center;margin-bottom:16px;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size:40px;color:#e74c3c;"></i>
+      </div>
+      <h3 style="font-size:17px;font-weight:900;color:var(--text);margin-bottom:8px;text-align:center;">Delete Customer Profile?</h3>
+      <p style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:20px;line-height:1.5;">This will permanently delete your customer account. Your phone number will be free to register again. Reviews you left will remain. This cannot be undone.</p>
+      <div class="field-group">
+        <label class="field-label">Enter your password to confirm</label>
+        <input class="field-input" type="password" id="deleteHirerPw" placeholder="Your password">
+        <span class="field-err" id="deleteHirerErr"></span>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button type="button" onclick="hideDeleteHirerModal()" style="flex:1;padding:12px;border-radius:var(--radius);background:var(--surface2);color:var(--text2);font-size:14px;font-weight:700;border:1.5px solid var(--border);">Cancel</button>
+        <button type="button" onclick="confirmDeleteHirer()" style="flex:1;padding:12px;border-radius:var(--radius);background:#e74c3c;color:white;font-size:14px;font-weight:700;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item">
+      <i class="fa-solid fa-house"></i>
+      <span data-key="home">Home</span>
+    </a>
+    <a href="browse.html" class="bnav-item">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span data-key="browse">Browse</span>
+    </a>
+    <a href="workerregister.html" class="bnav-item bnav-center">
+      <i class="fa-solid fa-plus"></i>
+      <span data-key="register">Register</span>
+    </a>
+    <a href="favourites.html" class="bnav-item">
+      <i class="fa-solid fa-heart"></i>
+      <span data-key="favourites">Favourites</span>
+    </a>
+    <a href="login.html" class="bnav-item active">
+      <i class="fa-solid fa-user"></i>
+      <span data-key="login">Login</span>
+    </a>
+  </nav>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+  <script src="hirerauth.js"></script>
+</body>
+</html>

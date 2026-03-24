@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Edit Profile - Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="workerregister.css">
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="javascript:history.back()" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="logo-text">
+        <span class="logo-main" data-key="editProfile">Edit Profile</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="menu-btn" onclick="openMenu()"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+     <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> <span data-key="about">About Cob Local</span></a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> <span data-key="contact">Contact Us</span></a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> <span data-key="privacy">Privacy Policy</span></a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <!-- NOT LOGGED IN -->
+  <div id="notLoggedIn" style="display:none">
+    <div class="fav-empty">
+      <i class="fa-solid fa-lock fav-empty-icon"></i>
+      <p data-key="loginRequired">Please login to edit your profile</p>
+      <a href="login.html" class="fav-browse-btn" data-key="login">Login</a>
+    </div>
+  </div>
+
+  <!-- WORKER EDIT -->
+  <div class="reg-wrap" id="workerEditWrap" style="display:none">
+
+    <div class="auth-card" style="margin-bottom:16px;">
+      <div class="dashboard-header" style="margin-bottom:0;padding-bottom:0;border-bottom:none;">
+        <div class="dashboard-photo" id="editWorkerPhoto"></div>
+        <div>
+          <div class="dashboard-name" id="editWorkerName"></div>
+          <div class="dashboard-skill" id="editWorkerSkill"></div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="step-title" data-key="basicInfo">Basic Information</h2>
+
+    <div class="field-group">
+      <label class="field-label">Mobile Number</label>
+      <div style="padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);font-size:14px;color:var(--text3);font-weight:600;" id="editWorkerPhone"></div>
+      <span class="field-hint">Phone number cannot be changed</span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Address</label>
+      <input class="field-input" type="text" id="editAddress" maxlength="120" placeholder="e.g. Near Town Hall, Sunity Road, Coochbehar">
+      <span class="field-hint">Help customers know if you are near them</span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" data-key="aboutYou">About You</label>
+      <textarea class="field-input field-textarea" id="editBio" maxlength="200" rows="3" placeholder="Briefly describe your experience..."></textarea>
+      <span class="field-hint" id="editBioCount">0 / 200</span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" data-key="workingHours">Working Hours</label>
+      <input class="field-input" type="text" id="editHours" maxlength="60" placeholder="e.g. 8am - 6pm, Mon to Sat">
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" data-key="availability">Availability</label>
+      <div class="toggle-row-field">
+        <span data-key="currentlyAvailable">Currently Available</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="editAvailable">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" data-key="hasWhatsApp">Has WhatsApp?</label>
+      <div class="toggle-row-field">
+        <span data-key="whatsAppOnSameNumber">WhatsApp on same number</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="editWhatsapp">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" data-key="profilePhoto">Profile Photo</label>
+      <div class="photo-upload-box" id="editPhotoBox" onclick="document.getElementById('editPhotoInput').click()">
+        <img id="editPhotoPreview" src="" alt="" style="display:none">
+        <div class="photo-upload-placeholder" id="editPhotoPlaceholder">
+          <i class="fa-solid fa-camera"></i>
+          <span data-key="tapToUpload">Tap to change photo</span>
+        </div>
+      </div>
+      <input type="file" id="editPhotoInput" accept="image/*" style="display:none" onchange="handleEditPhoto(this)">
+      <span class="field-hint" data-key="photoHint">Clear face photo. Max 2MB.</span>
+    </div>
+
+    <!-- AADHAAR RE-UPLOAD (only shown when rejected) -->
+    <div class="field-group" id="aadhaarReuploadGroup" style="display:none">
+      <label class="field-label" style="color:#e74c3c;"><i class="fa-solid fa-circle-xmark"></i> Aadhaar Verification Rejected</label>
+      <div style="background:#fee2e2;border-radius:10px;padding:10px 12px;font-size:12px;color:#991b1b;font-weight:600;margin-bottom:10px;">
+        Your previous Aadhaar was rejected. Please upload a clear photo of your Aadhaar card to re-apply for verification.
+      </div>
+      <div class="doc-upload-box" id="editAadhaarBox" onclick="document.getElementById('editAadhaarInput').click()">
+        <i class="fa-solid fa-id-card doc-upload-icon" id="editAadhaarIcon"></i>
+        <span class="doc-upload-label" id="editAadhaarLabel">Tap to upload new Aadhaar photo</span>
+      </div>
+      <input type="file" id="editAadhaarInput" accept="image/*" style="display:none" onchange="handleEditAadhaar(this)">
+      <span class="field-hint">Upload a clear, readable Aadhaar card photo</span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label"><i class="fa-solid fa-share-nodes"></i> Social Media Links <span style="color:var(--text3);font-size:11px;font-weight:600;">(optional)</span></label>
+      <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;" id="editSocialTagsContainer"></div>
+      <div class="social-link-add-row">
+        <select class="social-platform-select" id="editSocialPlatform">
+          <option value="Instagram">Instagram</option>
+          <option value="Facebook">Facebook</option>
+          <option value="YouTube">YouTube</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Website">Website</option>
+          <option value="Other">Other</option>
+        </select>
+        <input class="social-link-input" type="url" id="editSocialLinkInput" placeholder="Paste link here">
+        <button type="button" class="social-add-btn" onclick="addEditSocialLink()">Add</button>
+      </div>
+      <span class="field-hint">Tap Add after entering each link</span>
+    </div>
+
+    <span class="field-err auth-general-err" id="editWorkerErr"></span>
+    <button class="reg-btn-primary" type="button" onclick="saveWorkerProfile()" data-key="saveChanges">Save Changes</button>
+  </div>
+
+  <!-- HIRER EDIT -->
+  <div class="reg-wrap" id="hirerEditWrap" style="display:none">
+
+    <div class="auth-card" style="margin-bottom:16px;">
+      <div class="dashboard-header" style="margin-bottom:0;padding-bottom:0;border-bottom:none;">
+        <div class="dashboard-photo hirer-avatar" id="editHirerAvatar" style="overflow:hidden;"></div>
+        <div>
+          <div class="dashboard-name" id="editHirerName"></div>
+          <div class="dashboard-skill" data-key="hirerLabel">Customer</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="step-title" data-key="editDetails">Edit Details</h2>
+
+    <div class="field-group">
+      <label class="field-label" data-key="fullName">Full Name</label>
+      <input class="field-input" type="text" id="editHirerFullName" maxlength="60" placeholder="Your full name">
+      <span class="field-err" id="editHirerErrName"></span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" data-key="newPassword">New Password
+        <span style="color:var(--text3);font-weight:600;font-size:11px;"> (leave blank to keep current)</span>
+      </label>
+      <div class="pw-wrap">
+        <input class="field-input" type="password" id="editHirerPw" maxlength="40" placeholder="New password">
+        <button class="pw-eye" onclick="toggleEditPw('editHirerPw','editEye1')" type="button">
+          <i class="fa-regular fa-eye" id="editEye1"></i>
+        </button>
+      </div>
+      <span class="field-hint" data-key="pwHint">At least 6 characters</span>
+      <span class="field-err" id="editHirerErrPw"></span>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" data-key="confirmPassword">Confirm New Password</label>
+      <div class="pw-wrap">
+        <input class="field-input" type="password" id="editHirerPw2" maxlength="40" placeholder="Repeat new password">
+        <button class="pw-eye" onclick="toggleEditPw('editHirerPw2','editEye2')" type="button">
+          <i class="fa-regular fa-eye" id="editEye2"></i>
+        </button>
+      </div>
+      <span class="field-err" id="editHirerErrPw2"></span>
+    </div>
+
+    <span class="field-err auth-general-err" id="editHirerErr"></span>
+    <button class="reg-btn-primary" type="button" onclick="saveHirerProfile()" data-key="saveChanges">Save Changes</button>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item"><i class="fa-solid fa-house"></i><span data-key="home">Home</span></a>
+    <a href="browse.html" class="bnav-item"><i class="fa-solid fa-magnifying-glass"></i><span data-key="browse">Browse</span></a>
+    <a href="workerregister.html" class="bnav-item bnav-center"><i class="fa-solid fa-plus"></i><span data-key="register">Register</span></a>
+    <a href="favourites.html" class="bnav-item"><i class="fa-solid fa-heart"></i><span data-key="favourites">Favourites</span></a>
+    <a href="login.html" class="bnav-item active"><i class="fa-solid fa-user"></i><span data-key="login">Login</span></a>
+  </nav>
+  
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+  <script src="editprofile.js"></script>
+</body>
+</html>

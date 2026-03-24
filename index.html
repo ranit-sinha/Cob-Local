@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/logocl.png">
+  <link rel="apple-touch-icon" href="images/logocl.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cob Local</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <img src="images/logocl.png" onclick="openFullImg('images/logocl.png')" style="width:48px;height:48px;border-radius:12px;object-fit:contain;display:block;flex-shrink:0;cursor:zoom-in;">
+      <div class="logo-text">
+        <span class="logo-main" data-key="appName">Cob Local</span>
+        <span class="logo-sub" data-key="tagline">Find | Connect | Go</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">Bengali</button>
+      <button class="menu-btn" onclick="openMenu()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- SLIDE MENU -->
+  <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+  <nav class="slide-menu" id="slideMenu">
+    <div class="menu-header">
+      <span data-key="menu">Menu</span>
+      <button onclick="closeMenu()" class="menu-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <ul class="menu-list">
+      <li><a href="about.html"><i class="fa-solid fa-circle-info"></i> About Us</a></li>
+      <li><a href="contact.html"><i class="fa-solid fa-envelope"></i> Contact Us</a></li>
+      <li><a href="privacy.html"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a></li>
+      <li><a href="#" onclick="shareApp();closeMenu()"><i class="fa-solid fa-share-nodes"></i> Share App</a></li>
+      <li class="menu-report-item"><a href="report.html"><i class="fa-solid fa-triangle-exclamation"></i> Report an Issue</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO SEARCH -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <h1 class="hero-title" data-key="heroTitle">Find Trusted Local Services in Coochbehar</h1>
+      <p class="hero-sub" data-key="heroSub">Services at your fingertip</p>
+      <div class="search-box">
+        <input type="text" id="searchInput" data-key-placeholder="searchPlaceholder" placeholder="Search by name or skill..." oninput="handleSearch(this.value)">
+        <button class="search-btn" onclick="handleSearch(document.getElementById('searchInput').value)">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEARCH RESULTS -->
+  <section class="search-results" id="searchResults" style="display:none">
+    <div class="section-header">
+      <h2 data-key="searchResults">Search Results</h2>
+      <button class="clear-search" onclick="clearSearch()" data-key="clearSearch">Clear</button>
+    </div>
+    <div class="workers-grid" id="searchGrid"></div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="categories-section" id="mainContent">
+    <div class="section-header">
+      <h2 data-key="categories">Services</h2>
+    </div>
+    <div class="categories-grid">
+      <button class="cat-btn" onclick="openSubCat('tutor')"><span class="cat-icon"><i class="fa-solid fa-graduation-cap"></i></span><span class="cat-label" data-key="tutor">Tutor</span></button>
+      <button class="cat-btn" onclick="openSubCat('driver')"><span class="cat-icon"><i class="fa-solid fa-car-side"></i></span><span class="cat-label" data-key="driver">Driver</span></button>
+      <button class="cat-btn" onclick="openSubCat('institutes')"><span class="cat-icon"><i class="fa-solid fa-building-columns"></i></span><span class="cat-label" data-key="institutes">Institute</span></button>
+      <button class="cat-btn" onclick="openSubCat('shops')"><span class="cat-icon"><i class="fa-solid fa-store"></i></span><span class="cat-label" data-key="shops">Shop/Agency</span></button>
+      <button class="cat-btn" onclick="browseCat('electrician')"><span class="cat-icon"><i class="fa-solid fa-bolt"></i></span><span class="cat-label" data-key="electrician">Electrician</span></button>
+      <button class="cat-btn" onclick="browseCat('plumber')"><span class="cat-icon"><i class="fa-solid fa-faucet-drip"></i></span><span class="cat-label" data-key="plumber">Plumber</span></button>
+      <button class="cat-btn" onclick="browseCat('pujari')"><span class="cat-icon"><i class="fa-solid fa-person-praying"></i></span><span class="cat-label" data-key="pujari">Pujari</span></button>
+      <button class="cat-btn" onclick="browseCat('others')"><span class="cat-icon"><i class="fa-solid fa-person"></i></span><span class="cat-label" data-key="others">Others</span></button>
+    </div>
+  </section>
+
+  <!-- TOP RATED PROVIDERS -->
+  <section class="top-rated-section">
+    <div class="section-header">
+      <h2 data-key="topRated">Top Rated Providers</h2>
+      <a href="browse.html" class="see-all" data-key="seeAll">See All</a>
+    </div>
+    <div class="workers-grid" id="topRatedGrid">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+  </section>
+
+  <!-- NO SMARTPHONE -->
+  <section class="nosmp-section">
+    <div class="section-header">
+      <h2 data-key="nosmp">Have No Smartphone</h2>
+      <a href="browse.html" class="see-all" data-key="seeAll">See All</a>
+    </div>
+    <div class="workers-grid" id="nosmpGrid">
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+      <div class="skeleton-card"></div>
+    </div>
+  </section>
+
+  <!-- REGISTER BANNER -->
+  <section class="register-banner">
+    <div class="banner-content">
+      <h3 data-key="bannerTitle">Are you a Provider?</h3>
+      <p data-key="bannerSub">Create your free profile and get customers today</p>
+      <a href="workerregister.html" class="banner-btn" data-key="registerNow">Register Now</a>
+    </div>
+  </section>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="bnav-item active">
+      <i class="fa-solid fa-house"></i>
+      <span data-key="home">Home</span>
+    </a>
+    <a href="browse.html" class="bnav-item">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span data-key="browse">Browse</span>
+    </a>
+    <a href="workerregister.html" class="bnav-item bnav-center">
+      <i class="fa-solid fa-plus"></i>
+      <span data-key="register">Register</span>
+    </a>
+    <a href="favourites.html" class="bnav-item">
+      <i class="fa-solid fa-heart"></i>
+      <span data-key="favourites">Favourites</span>
+    </a>
+    <a href="login.html" class="bnav-item">
+      <i class="fa-solid fa-user"></i>
+      <span data-key="login">Login</span>
+    </a>
+  </nav>
+
+  <!-- SUB-CATEGORY BOTTOM SHEET -->
+  <div class="subcat-overlay" id="subcatOverlay" onclick="closeSubCat()"></div>
+  <div class="subcat-sheet" id="subcatSheet">
+    <div class="subcat-header">
+      <span id="subcatTitle">Select Sub-category</span>
+      <button onclick="closeSubCat()" class="subcat-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="subcat-grid" id="subcatGrid"></div>
+    <button class="subcat-all-btn" id="subcatAllBtn" onclick="closeSubCat()">View All</button>
+  </div>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script src="lang.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
