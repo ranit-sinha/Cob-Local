@@ -94,7 +94,7 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
     }
     var blob = new Blob([ab], { type: mimeType || 'image/webp' });
     
-    /* First try to upload using the correct storage endpoint */
+    /* Upload using the storage endpoint */
     var uploadUrl = SUPABASE_URL + "/storage/v1/object/photos/" + filePath;
     
     var res = await fetch(uploadUrl, {
@@ -109,7 +109,7 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
     console.log("Upload response status:", res.status);
     
     if (!res.ok) {
-      // If file exists, try PUT
+      /* If file exists, try PUT */
       res = await fetch(uploadUrl, {
         method: "PUT",
         headers: {
@@ -122,7 +122,7 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
     }
     
     if (res.ok) {
-      // Return the public URL
+      /* Return the public URL with timestamp to bust cache */
       var publicUrl = SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + "?t=" + Date.now();
       console.log("Upload successful, public URL:", publicUrl);
       return publicUrl;
