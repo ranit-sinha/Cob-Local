@@ -29,7 +29,6 @@ const auth   = getAuth(app);
 const db     = getFirestore(app);
 
 /* -- SUPABASE HELPER FUNCTIONS -- */
-/* Used for reading workers (unlimited free reads) */
 
 async function supabaseGet(table, filters) {
   var url = SUPABASE_URL + "/rest/v1/" + table + "?select=*";
@@ -83,47 +82,62 @@ async function supabaseDelete(table, id) {
 }
 
 async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
-  /* Convert base64 to blob */
-  var byteString = atob(base64Data.split(',')[1]);
-  var ab = new ArrayBuffer(byteString.length);
-  var ia = new Uint8Array(ab);
-  for (var i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  var blob = new Blob([ab], { type: mimeType || 'image/webp' });
-
-  /* Try POST first (new file), if fails try PUT (overwrite existing) */
-  var res = await fetch(SUPABASE_URL + "/storage/v1/object/photos/" + filePath, {
-    method: "POST",
-    headers: {
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-      "Content-Type": mimeType || 'image/webp'
-    },
-    body: blob
-  });
-  if (!res.ok) {
-    /* File exists â€” overwrite with PUT */
-    res = await fetch(SUPABASE_URL + "/storage/v1/object/photos/" + filePath, {
-      method: "PUT",
+  try {
+    console.log("Uploading to path:", filePath);
+    
+    /* Convert base64 to blob */
+    var byteString = atob(base64Data.split(',')[1]);
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    var blob = new Blob([ab], { type: mimeType || 'image/webp' });
+    
+    /* First try to upload using the correct storage endpoint */
+    var uploadUrl = SUPABASE_URL + "/storage/v1/object/photos/" + filePath;
+    
+    var res = await fetch(uploadUrl, {
+      method: "POST",
       headers: {
         "apikey": SUPABASE_ANON_KEY,
-        "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-        "Content-Type": mimeType || 'image/webp'
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY
       },
       body: blob
     });
+    
+    console.log("Upload response status:", res.status);
+    
+    if (!res.ok) {
+      // If file exists, try PUT
+      res = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": "Bearer " + SUPABASE_ANON_KEY
+        },
+        body: blob
+      });
+      console.log("PUT response status:", res.status);
+    }
+    
+    if (res.ok) {
+      // Return the public URL
+      var publicUrl = SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + "?t=" + Date.now();
+      console.log("Upload successful, public URL:", publicUrl);
+      return publicUrl;
+    } else {
+      const errorText = await res.text();
+      console.error("Upload failed with status:", res.status, "Error:", errorText);
+      return null;
+    }
+  } catch (error) {
+    console.error("Upload error:", error);
+    return null;
   }
-  if (res.ok) {
-    /* Add timestamp to bust browser cache */
-    return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + "?t=" + Date.now();
-  }
-  return null;
 }
 
-/* -- PHONE TO EMAIL HELPER --
-   Firebase Auth uses email/password.
-   We store phone as phone@coblocal.app */
+/* -- PHONE TO EMAIL HELPER -- */
 function phoneToEmail(phone) {
   return phone + "@coblocal.app";
 }
