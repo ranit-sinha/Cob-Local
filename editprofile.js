@@ -211,17 +211,16 @@ async function saveWorkerProfile() {
     /* Upload new photo if changed */
     if (isPhotoChanged && window._newPhotoData) {
       showToast("Uploading photo...");
-      var photoPath = "profiles/" + editWorkerData.id + "/photo.webp";
+      var photoPath = editWorkerData.id + "/photo.webp";
       var uploaded = await window.supabaseUploadPhoto(photoPath, window._newPhotoData, "image/webp");
       
       if (uploaded) {
         photoURL = uploaded;
         showToast("Photo uploaded successfully!");
-        // Clear the stored photo data after successful upload
         delete window._newPhotoData;
         isPhotoChanged = false;
       } else {
-        throw new Error("Failed to upload photo");
+        throw new Error("Failed to upload photo. Please check console for details.");
       }
     }
 
