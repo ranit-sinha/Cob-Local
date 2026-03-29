@@ -92,7 +92,6 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
   }
   var blob = new Blob([ab], { type: mimeType || 'image/webp' });
 
-  /* Try POST first (new file), if fails try PUT (overwrite existing) */
   var res = await fetch(SUPABASE_URL + "/storage/v1/object/photos/" + filePath, {
     method: "POST",
     headers: {
@@ -102,21 +101,8 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
     },
     body: blob
   });
-  if (!res.ok) {
-    /* File exists â€” overwrite with PUT */
-    res = await fetch(SUPABASE_URL + "/storage/v1/object/photos/" + filePath, {
-      method: "PUT",
-      headers: {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-        "Content-Type": mimeType || 'image/webp'
-      },
-      body: blob
-    });
-  }
   if (res.ok) {
-    /* Add timestamp to bust browser cache */
-    return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + "?t=" + Date.now();
+    return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath;
   }
   return null;
 }
