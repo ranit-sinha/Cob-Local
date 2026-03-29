@@ -4,6 +4,51 @@ var editUserType  = null;
 var editWorkerData = null;
 var editHirerUid = null;
 
+// ===== MISSING HELPER FUNCTIONS =====
+function workerFromSupabase(data) {
+  return {
+    id: data.id,
+    name: data.name,
+    phone: data.phone,
+    skill: data.skill,
+    subSkill: data.sub_skill,
+    address: data.address || "",
+    bio: data.bio || "",
+    workingHours: data.working_hours || "",
+    available: data.available || false,
+    hasWhatsApp: data.has_whatsapp || false,
+    photoURL: data.photo_url || "",
+    socialLinks: data.social_links || []
+  };
+}
+
+function showToast(message, isError = false) {
+  var toast = document.getElementById("toast") || createToast();
+  toast.textContent = message;
+  toast.className = "show" + (isError ? " error" : "");
+  setTimeout(function() {
+    toast.className = toast.className.replace("show", "");
+  }, 3000);
+}
+
+function createToast() {
+  var toast = document.createElement("div");
+  toast.id = "toast";
+  toast.style.position = "fixed";
+  toast.style.bottom = "20px";
+  toast.style.left = "50%";
+  toast.style.transform = "translateX(-50%)";
+  toast.style.backgroundColor = "#333";
+  toast.style.color = "#fff";
+  toast.style.padding = "12px 24px";
+  toast.style.borderRadius = "8px";
+  toast.style.zIndex = "9999";
+  toast.style.display = "none";
+  document.body.appendChild(toast);
+  return toast;
+}
+// ====================================
+
 document.addEventListener("DOMContentLoaded", async function() {
   var workerSession = localStorage.getItem("ctj_worker_session");
   var hirerSession  = localStorage.getItem("ctj_hirer_session");
