@@ -1,10 +1,6 @@
 /* COBLOCAL -- EDITPROFILE.JS */
 
-var editUserType  = null;
-var editWorkerData = null;
-var editHirerUid = null;
-
-// ===== MISSING HELPER FUNCTIONS =====
+// === ADD THESE MISSING HELPER FUNCTIONS ===
 function workerFromSupabase(data) {
   return {
     id: data.id,
@@ -47,7 +43,11 @@ function createToast() {
   document.body.appendChild(toast);
   return toast;
 }
-// ====================================
+// ========================================
+
+var editUserType  = null;
+var editWorkerData = null;
+var editHirerUid = null;
 
 document.addEventListener("DOMContentLoaded", async function() {
   var workerSession = localStorage.getItem("ctj_worker_session");
