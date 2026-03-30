@@ -1,8 +1,10 @@
 /* COBLOCAL STYLE.CSS */
 
-a, button {
+*, a, button, input, select, textarea, label, [onclick] {
   outline: none;
-  -webkit-tap-highlight-color: rgba(0,0,0,0.06);
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 :root {
