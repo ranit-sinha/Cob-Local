@@ -25,6 +25,29 @@ function generateToken() {
   }).join('');
 }
 
+/*
+ * ROOT FIX: firebase-config.js is type="module" (always deferred).
+ * This plain <script> runs before the module finishes, so window.firestoreSetDoc
+ * is undefined when submitRegistration() calls it â€” the Aadhaar Firestore write
+ * throws silently and nothing reaches the admin panel.
+ *
+ * waitForFirebase() polls until all window.* exports are ready.
+ */
+function waitForFirebase() {
+  return new Promise(function(resolve) {
+    if (window.firestoreSetDoc && window.supabaseUploadPhoto && window.createUserWithEmailAndPassword) {
+      resolve();
+      return;
+    }
+    var interval = setInterval(function() {
+      if (window.firestoreSetDoc && window.supabaseUploadPhoto && window.createUserWithEmailAndPassword) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 30);
+  });
+}
+
 function selectProviderType(type) {
   currentProviderType = type;
   document.getElementById("typeWorkerBtn").className = "type-select-btn" + (type === "worker" ? " type-active" : "");
@@ -234,6 +257,9 @@ async function submitRegistration() {
   var submitBtn = document.querySelector(".reg-btn-accent[onclick='submitRegistration()']");
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Registering..."; }
 
+  /* Wait for firebase-config module to finish exporting to window.* */
+  await waitForFirebase();
+
   var isBusiness = currentProviderType === "business";
   var bizCat = isBusiness ? document.getElementById("regBusinessCategory").value : "";
   var bizSubType = isBusiness ? document.getElementById("regBusinessSubType").value : "";
@@ -262,18 +288,14 @@ async function submitRegistration() {
       setErr("errPhone", "This number is already registered. Please login instead.");
       goStep(3);
     } else {
-      setErr("errTerms", "Step1 Firebase error: " + err.code);
+      setErr("errTerms", "Registration error: " + err.code);
     }
     return;
   }
 
-  /* Generate secret token â€” stored in DB for reference, NOT used in photo path */
   var secretToken = generateToken();
 
-  /* STEP 2: Upload photo
-   * FIXED: Use simple stable path â€” profiles/{uid}/photo.webp
-   * No secret token in path. x-upsert header handles create-or-replace.
-   */
+  /* STEP 2: Upload profile photo to Supabase */
   var photoURL = "";
   if (photoData && photoData.startsWith("data:")) {
     var photoPath = "profiles/" + uid + "/photo.webp";
@@ -281,7 +303,7 @@ async function submitRegistration() {
     if (uploaded) photoURL = uploaded;
   }
 
-  /* STEP 3: Supabase insert */
+  /* STEP 3: Insert worker row into Supabase */
   var workerRow = {
     id:                uid,
     name:              document.getElementById("regName").value.trim(),
@@ -307,7 +329,7 @@ async function submitRegistration() {
     average_rating:    0,
     total_feedbacks:   0,
     created_at:        Date.now(),
-    secret_token:      secretToken   /* stored in DB but not in storage path */
+    secret_token:      secretToken
   };
 
   var sbKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0cWN5amtocmdtc3hmaHVlYm1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjgyODYsImV4cCI6MjA4OTc0NDI4Nn0.LWKcRLPjZAZqWjeHvlpECDUe7135v1_qZ2zKfwl3Uu0";
@@ -330,7 +352,7 @@ async function submitRegistration() {
     return;
   }
 
-  /* STEP 4: Aadhaar */
+  /* STEP 4: Upload Aadhaar to Supabase storage, then write to Firestore */
   if (!isBusiness && window._aadhaarPhotoData) {
     try {
       var aadhaarPath = "aadhaar/" + uid + "/aadhaar.jpg";
@@ -338,12 +360,17 @@ async function submitRegistration() {
         aadhaarPath, window._aadhaarPhotoData, "image/jpeg"
       );
       if (aadhaarURL) {
+        /* window.firestoreSetDoc is now guaranteed to exist thanks to waitForFirebase() */
         await window.firestoreSetDoc(
           window.firestoreDoc(window.firebaseDb, "aadhaar_pending", uid),
           { workerId: uid, aadhaarUrl: aadhaarURL, status: "pending", createdAt: Date.now() }
         );
+      } else {
+        console.error("Aadhaar Supabase upload returned null - check bucket policy for aadhaar/ path");
       }
-    } catch(err) { console.error("Aadhaar upload error:", err); }
+    } catch(err) {
+      console.error("Aadhaar upload/Firestore write error:", err);
+    }
   }
 
   /* STEP 5: Auto-login and show success */
