@@ -110,7 +110,7 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
   if (!res.ok) {
     var putStatus = res.status;
     var putErr = await res.text();
-    console.warn("supabaseUploadPhoto PUT failed (" + putStatus + "):", putErr, "â€” trying POST...");
+    console.warn("supabaseUploadPhoto PUT failed (" + putStatus + "):", putErr, "-” trying POST...");
 
     res = await fetch(uploadUrl, {
       method: "POST",
