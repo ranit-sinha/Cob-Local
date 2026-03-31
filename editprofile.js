@@ -109,10 +109,10 @@ async function saveWorkerProfile() {
   var photoURL = editWorkerData.photoURL || "";
 
   if (preview && preview.style.display !== "none" && preview.src.startsWith("data:")) {
-    showToast("Uploading photoâ€¦");
+    showToast("Uploading photo");
 
     /*
-     * FIXED: Use a simple, stable path â€” profiles/{id}/photo.webp
+     * FIXED: Use a simple, stable path profiles/{id}/photo.webp
      * The secret token is no longer part of the path.
      * Your app-level auth (localStorage session check) already prevents
      * unauthorized edits, so the path doesn't need to be secret.
