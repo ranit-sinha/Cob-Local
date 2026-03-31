@@ -1,8 +1,5 @@
 /* ============================================
    COBLOCAL -- LANG.JS
-   ONE file handles ALL pages.
-   English is read from HTML automatically.
-   Only edit the BN values below for Bengali.
    ============================================ */
 
 var BN = {
