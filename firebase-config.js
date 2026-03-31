@@ -96,7 +96,7 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
     "apikey": SUPABASE_ANON_KEY,
     "Authorization": "Bearer " + SUPABASE_ANON_KEY,
     "Content-Type": mimeType || 'image/webp',
-    "x-upsert": "true"   /* upsert: create if missing, replace if exists */
+    "x-upsert": "true"
   };
 
   /* Try PUT (upsert) first */
@@ -106,11 +106,14 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
     body: blob
   });
 
-  /* If PUT fails (e.g. object doesn't exist yet and policy only allows INSERT), try POST */
   if (!res.ok) {
     var putStatus = res.status;
     var putErr = await res.text();
-    console.warn("supabaseUploadPhoto PUT failed (" + putStatus + "):", putErr, "-” trying POST...");
+    /* FIXED: previous version had a broken string literal here:
+       console.warn("...", "-" trying POST...");
+       The stray quote after "-" was a syntax error that crashed the entire
+       module, preventing all Firestore functions from being exported.     */
+    console.warn("supabaseUploadPhoto PUT failed (" + putStatus + "): " + putErr + " - trying POST...");
 
     res = await fetch(uploadUrl, {
       method: "POST",
@@ -120,7 +123,6 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
   }
 
   if (res.ok) {
-    /* Append cache-busting timestamp so the browser always loads the new photo */
     return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + "?t=" + Date.now();
   }
 
