@@ -17,6 +17,14 @@ var BUSINESS_SUB_OPTIONS = {
   "Institute": ["Private Teaching / Coaching", "Singing Classes", "Dance Classes", "Modeling / Acting", "Art & Drawing", "Music Instrument", "Sports Academy", "Others"]
 };
 
+function generateToken() {
+  var arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(function(b) {
+    return b.toString(16).padStart(2, '0');
+  }).join('');
+}
+
 function selectProviderType(type) {
   currentProviderType = type;
   document.getElementById("typeWorkerBtn").className = "type-select-btn" + (type === "worker" ? " type-active" : "");
@@ -259,42 +267,46 @@ async function submitRegistration() {
     return;
   }
 
-  /* STEP 2: Upload photo */
+  /* Generate secret token for this worker */
+  var secretToken = generateToken();
+
+  /* STEP 2: Upload photo — path includes secret token for security */
   var photoURL = "";
-  if (photoData) {
-    var photoPath = "profiles/" + uid + "/photo.webp";
+  if (photoData && photoData.startsWith("data:")) {
+    var photoPath = "profiles/" + uid + "/" + secretToken + "/photo.webp";
     var uploaded = await window.supabaseUploadPhoto(photoPath, photoData, "image/webp");
     if (uploaded) photoURL = uploaded;
   }
 
-  /* STEP 3: Supabase insert */
+  /* STEP 3: Supabase insert — secret_token saved with worker row */
   var workerRow = {
-    id:               uid,
-    name:             document.getElementById("regName").value.trim(),
-    provider_type:    currentProviderType,
-    business_type:    bizCat,
+    id:                uid,
+    name:              document.getElementById("regName").value.trim(),
+    provider_type:     currentProviderType,
+    business_type:     bizCat,
     business_sub_type: bizSubType,
-    contact_person:   isBusiness ? document.getElementById("regContactPerson").value.trim() : "",
-    age:              isBusiness ? null : parseInt(document.getElementById("regAge").value, 10),
-    gender:           isBusiness ? "" : (document.querySelector('input[name="regGender"]:checked') ? document.querySelector('input[name="regGender"]:checked').value : ""),
-    bio:              document.getElementById("regBio").value.trim(),
-    address:          document.getElementById("regAddress").value.trim(),
-    skill:            skill,
-    sub_skill:        subSkill,
-    working_hours:    document.getElementById("regHours").value.trim(),
-    available:        document.getElementById("regAvailable").checked,
-    phone:            phone,
-    has_smartphone:   hasSmartphone,
-    has_whatsapp:     hasSmartphone && document.getElementById("regWhatsapp").checked,
-    aadhaar_verified: false,
-    social_links:     socialLinks.slice(),
-    photo_url:        photoURL,
-    average_rating:   0,
-    total_feedbacks:  0,
-    created_at:       Date.now()
+    contact_person:    isBusiness ? document.getElementById("regContactPerson").value.trim() : "",
+    age:               isBusiness ? null : parseInt(document.getElementById("regAge").value, 10),
+    gender:            isBusiness ? "" : (document.querySelector('input[name="regGender"]:checked')
+                         ? document.querySelector('input[name="regGender"]:checked').value : ""),
+    bio:               document.getElementById("regBio").value.trim(),
+    address:           document.getElementById("regAddress").value.trim(),
+    skill:             skill,
+    sub_skill:         subSkill,
+    working_hours:     document.getElementById("regHours").value.trim(),
+    available:         document.getElementById("regAvailable").checked,
+    phone:             phone,
+    has_smartphone:    hasSmartphone,
+    has_whatsapp:      hasSmartphone && document.getElementById("regWhatsapp").checked,
+    aadhaar_verified:  false,
+    social_links:      socialLinks.slice(),
+    photo_url:         photoURL,
+    average_rating:    0,
+    total_feedbacks:   0,
+    created_at:        Date.now(),
+    secret_token:      secretToken
   };
 
-  /* Direct fetch so we can see the exact Supabase error */
   var sbKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0cWN5amtocmdtc3hmaHVlYm1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjgyODYsImV4cCI6MjA4OTc0NDI4Nn0.LWKcRLPjZAZqWjeHvlpECDUe7135v1_qZ2zKfwl3Uu0";
   var sbRes = await fetch("https://ftqcyjkhrgmsxfhuebme.supabase.co/rest/v1/workers", {
     method: "POST",
@@ -319,7 +331,9 @@ async function submitRegistration() {
   if (!isBusiness && window._aadhaarPhotoData) {
     try {
       var aadhaarPath = "aadhaar/" + uid + "/aadhaar.jpg";
-      var aadhaarURL = await window.supabaseUploadPhoto(aadhaarPath, window._aadhaarPhotoData, "image/jpeg");
+      var aadhaarURL = await window.supabaseUploadPhoto(
+        aadhaarPath, window._aadhaarPhotoData, "image/jpeg"
+      );
       if (aadhaarURL) {
         await window.firestoreSetDoc(
           window.firestoreDoc(window.firebaseDb, "aadhaar_pending", uid),
@@ -351,7 +365,8 @@ document.addEventListener("DOMContentLoaded", function() {
   }
   document.querySelectorAll('input[name="regPhoneType"]').forEach(function(r) {
     r.addEventListener("change", function() {
-      document.getElementById("whatsappGroup").style.display = this.value === "basic" ? "none" : "block";
+      document.getElementById("whatsappGroup").style.display =
+        this.value === "basic" ? "none" : "block";
     });
   });
 });
