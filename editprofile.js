@@ -2,7 +2,7 @@
 
 var editUserType  = null;
 var editWorkerData = null;
-var editHirerUid = null;
+var editHirerUid  = null;
 
 document.addEventListener("DOMContentLoaded", async function() {
   var workerSession = localStorage.getItem("ctj_worker_session");
@@ -113,6 +113,7 @@ function handleEditPhoto(input) {
 
 async function saveWorkerProfile() {
   document.getElementById("editWorkerErr").textContent = "";
+
   var bio     = document.getElementById("editBio").value.trim();
   var address = document.getElementById("editAddress").value.trim();
   var hours   = document.getElementById("editHours").value.trim();
@@ -122,16 +123,22 @@ async function saveWorkerProfile() {
 
   var photoURL = editWorkerData.photoURL || "";
 
-  /* Upload new photo if changed */
+  /* Upload new photo if the preview is showing a freshly picked image (data: URL) */
   if (preview && preview.style.display !== "none" && preview.src.startsWith("data:")) {
+    showToast("Uploading photo…");
     var photoPath = "profiles/" + editWorkerData.id + "/photo.webp";
-    var uploaded = await window.supabaseUploadPhoto(photoPath, preview.src, "image/webp");
-    if (uploaded) photoURL = uploaded;
+    var uploaded  = await window.supabaseUploadPhoto(photoPath, preview.src, "image/webp");
+    if (uploaded) {
+      photoURL = uploaded;   /* new URL with cache-buster — saved to DB */
+    } else {
+      showToast("Photo upload failed. Please try again.");
+      return;               /* stop here — don't save stale data */
+    }
   }
 
   /* Upload new Aadhaar if provided */
   if (window._newAadhaarData) {
-    var aadhaarPath = "aadhaar/" + editWorkerData.id + "/aadhaar.jpg";
+    var aadhaarPath     = "aadhaar/" + editWorkerData.id + "/aadhaar.jpg";
     var aadhaarUploaded = await window.supabaseUploadPhoto(aadhaarPath, window._newAadhaarData, "image/jpeg");
     if (aadhaarUploaded) {
       await window.firestoreSetDoc(
@@ -142,15 +149,20 @@ async function saveWorkerProfile() {
     }
   }
 
-  await window.supabaseUpdate("workers", editWorkerData.id, {
-    bio: bio,
-    address: address,
+  var updated = await window.supabaseUpdate("workers", editWorkerData.id, {
+    bio:           bio,
+    address:       address,
     working_hours: hours,
-    available: avail,
-    has_whatsapp: wa,
-    photo_url: photoURL,
-    social_links: window._editSocialLinks || []
+    available:     avail,
+    has_whatsapp:  wa,
+    photo_url:     photoURL,
+    social_links:  window._editSocialLinks || []
   });
+
+  if (!updated) {
+    showToast("Save failed. Please try again.");
+    return;
+  }
 
   showToast("Profile updated!");
   setTimeout(function() {
@@ -168,8 +180,8 @@ async function loadHirerEdit(uid) {
 
     var avatarEl = document.getElementById("editHirerAvatar");
     avatarEl.textContent = hirer.name.charAt(0).toUpperCase();
-    document.getElementById("editHirerName").textContent  = hirer.name;
-    document.getElementById("editHirerFullName").value    = hirer.name;
+    document.getElementById("editHirerName").textContent = hirer.name;
+    document.getElementById("editHirerFullName").value   = hirer.name;
   } catch(err) {
     console.error("loadHirerEdit error:", err);
     show("notLoggedIn");
@@ -201,7 +213,10 @@ async function saveHirerProfile() {
   }
   if (!ok) return;
 
-  await window.firestoreUpdateDoc(window.firestoreDoc(window.firebaseDb, "hirers", editHirerUid), { name: name });
+  await window.firestoreUpdateDoc(
+    window.firestoreDoc(window.firebaseDb, "hirers", editHirerUid),
+    { name: name }
+  );
 
   if (pw) {
     try {
@@ -220,7 +235,7 @@ function toggleEditPw(inputId, iconId) {
   var input = document.getElementById(inputId);
   var icon  = document.getElementById(iconId);
   if (input.type === "password") {
-    input.type = "text"; icon.className = "fa-regular fa-eye-slash";
+    input.type = "text";     icon.className = "fa-regular fa-eye-slash";
   } else {
     input.type = "password"; icon.className = "fa-regular fa-eye";
   }
