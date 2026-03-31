@@ -1,8 +1,6 @@
 /* ============================================
    COB LOCAL -- FIREBASE-CONFIG.JS
-   Firebase + Supabase initialization
-   Include this in every HTML file before
-   any other scripts that need the database
+   Firebase (Auth + Firestore) + Supabase (Storage + Workers)
    ============================================ */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -24,11 +22,13 @@ const SUPABASE_URL = "https://ftqcyjkhrgmsxfhuebme.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0cWN5amtocmdtc3hmaHVlYm1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjgyODYsImV4cCI6MjA4OTc0NDI4Nn0.LWKcRLPjZAZqWjeHvlpECDUe7135v1_qZ2zKfwl3Uu0";
 
 /* -- INITIALIZE FIREBASE -- */
-const app = initializeApp(firebaseConfig);
+const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db   = getFirestore(app);
 
-/* -- SUPABASE HELPER FUNCTIONS -- */
+/* ============================================
+   SUPABASE FUNCTIONS
+   ============================================ */
 
 async function supabaseGet(table, filters) {
   var url = SUPABASE_URL + "/rest/v1/" + table + "?select=*";
@@ -82,7 +82,6 @@ async function supabaseDelete(table, id) {
 }
 
 async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
-  /* Convert base64 to blob */
   var byteString = atob(base64Data.split(',')[1]);
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
@@ -91,7 +90,6 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
   }
   var blob = new Blob([ab], { type: mimeType || 'image/webp' });
 
-  /* PUT with x-upsert:true overwrites the existing file instead of failing */
   var res = await fetch(SUPABASE_URL + "/storage/v1/object/photos/" + filePath, {
     method: "PUT",
     headers: {
@@ -104,12 +102,9 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
   });
 
   if (res.ok) {
-    /* Append timestamp as cache-buster so browsers always load the new photo */
-    var cacheBust = "?t=" + Date.now();
-    return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + cacheBust;
+    return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + "?t=" + Date.now();
   }
 
-  /* Log the real error so you can debug future failures */
   var errText = await res.text();
   console.error("supabaseUploadPhoto failed:", res.status, errText);
   return null;
@@ -120,7 +115,9 @@ function phoneToEmail(phone) {
   return phone + "@coblocal.app";
 }
 
-/* -- EXPORT EVERYTHING -- */
+/* ============================================
+   EXPORT EVERYTHING
+   ============================================ */
 window.firebaseAuth                   = auth;
 window.firebaseDb                     = db;
 window.supabaseGet                    = supabaseGet;
