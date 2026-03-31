@@ -22,6 +22,7 @@ async function loadWorkerEdit(workerId) {
   if (!results || results.length === 0) { show("notLoggedIn"); return; }
   var w = results[0];
   editWorkerData = workerFromSupabase(w);
+  /* Keep secret_token available but we no longer put it in the photo path */
   editWorkerData.secretToken = w.secret_token || null;
   window._editSocialLinks = editWorkerData.socialLinks ? editWorkerData.socialLinks.slice() : [];
   show("workerEditWrap");
@@ -108,20 +109,20 @@ async function saveWorkerProfile() {
   var photoURL = editWorkerData.photoURL || "";
 
   if (preview && preview.style.display !== "none" && preview.src.startsWith("data:")) {
-    showToast("Uploading photo…");
+    showToast("Uploading photoâ€¦");
 
-    /* Build path — use secret token if available, otherwise use id only */
-    var photoPath;
-    if (editWorkerData.secretToken) {
-      photoPath = "profiles/" + editWorkerData.id + "/" + editWorkerData.secretToken + "/photo.webp";
-    } else {
-      photoPath = "profiles/" + editWorkerData.id + "/photo.webp";
-    }
+    /*
+     * FIXED: Use a simple, stable path â€” profiles/{id}/photo.webp
+     * The secret token is no longer part of the path.
+     * Your app-level auth (localStorage session check) already prevents
+     * unauthorized edits, so the path doesn't need to be secret.
+     * This path is consistent across re-uploads, so upsert always works.
+     */
+    var photoPath = "profiles/" + editWorkerData.id + "/photo.webp";
 
     var uploaded = await window.supabaseUploadPhoto(photoPath, preview.src, "image/webp");
     if (uploaded) {
       photoURL = uploaded;
-      /* Save the new path back to DB so profile page shows correct URL */
     } else {
       showToast("Photo upload failed. Please try again.");
       return;
