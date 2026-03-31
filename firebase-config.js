@@ -24,12 +24,11 @@ const SUPABASE_URL = "https://ftqcyjkhrgmsxfhuebme.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0cWN5amtocmdtc3hmaHVlYm1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjgyODYsImV4cCI6MjA4OTc0NDI4Nn0.LWKcRLPjZAZqWjeHvlpECDUe7135v1_qZ2zKfwl3Uu0";
 
 /* -- INITIALIZE FIREBASE -- */
-const app    = initializeApp(firebaseConfig);
-const auth   = getAuth(app);
-const db     = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 /* -- SUPABASE HELPER FUNCTIONS -- */
-/* Used for reading workers (unlimited free reads) */
 
 async function supabaseGet(table, filters) {
   var url = SUPABASE_URL + "/rest/v1/" + table + "?select=*";
@@ -92,49 +91,56 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
   }
   var blob = new Blob([ab], { type: mimeType || 'image/webp' });
 
+  /* PUT with x-upsert:true overwrites the existing file instead of failing */
   var res = await fetch(SUPABASE_URL + "/storage/v1/object/photos/" + filePath, {
-    method: "POST",
+    method: "PUT",
     headers: {
       "apikey": SUPABASE_ANON_KEY,
       "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-      "Content-Type": mimeType || 'image/webp'
+      "Content-Type": mimeType || 'image/webp',
+      "x-upsert": "true"
     },
     body: blob
   });
+
   if (res.ok) {
-    return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath;
+    /* Append timestamp as cache-buster so browsers always load the new photo */
+    var cacheBust = "?t=" + Date.now();
+    return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + cacheBust;
   }
+
+  /* Log the real error so you can debug future failures */
+  var errText = await res.text();
+  console.error("supabaseUploadPhoto failed:", res.status, errText);
   return null;
 }
 
-/* -- PHONE TO EMAIL HELPER --
-   Firebase Auth uses email/password.
-   We store phone as phone@coblocal.app */
+/* -- PHONE TO EMAIL HELPER -- */
 function phoneToEmail(phone) {
   return phone + "@coblocal.app";
 }
 
 /* -- EXPORT EVERYTHING -- */
-window.firebaseAuth    = auth;
-window.firebaseDb      = db;
-window.supabaseGet     = supabaseGet;
-window.supabaseInsert  = supabaseInsert;
-window.supabaseUpdate  = supabaseUpdate;
-window.supabaseDelete  = supabaseDelete;
-window.supabaseUploadPhoto = supabaseUploadPhoto;
-window.phoneToEmail    = phoneToEmail;
-window.firebaseSignOut = signOut;
-window.onAuthStateChanged = onAuthStateChanged;
+window.firebaseAuth                   = auth;
+window.firebaseDb                     = db;
+window.supabaseGet                    = supabaseGet;
+window.supabaseInsert                 = supabaseInsert;
+window.supabaseUpdate                 = supabaseUpdate;
+window.supabaseDelete                 = supabaseDelete;
+window.supabaseUploadPhoto            = supabaseUploadPhoto;
+window.phoneToEmail                   = phoneToEmail;
+window.firebaseSignOut                = signOut;
+window.onAuthStateChanged             = onAuthStateChanged;
 window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
 window.signInWithEmailAndPassword     = signInWithEmailAndPassword;
-window.firestoreDoc      = doc;
-window.firestoreSetDoc   = setDoc;
-window.firestoreGetDoc   = getDoc;
-window.firestoreGetDocs  = getDocs;
-window.firestoreCollection = collection;
-window.firestoreQuery    = query;
-window.firestoreWhere    = where;
-window.firestoreOrderBy  = orderBy;
-window.firestoreAddDoc   = addDoc;
-window.firestoreUpdateDoc = updateDoc;
-window.firestoreDeleteDoc = deleteDoc;
+window.firestoreDoc                   = doc;
+window.firestoreSetDoc                = setDoc;
+window.firestoreGetDoc                = getDoc;
+window.firestoreGetDocs               = getDocs;
+window.firestoreCollection            = collection;
+window.firestoreQuery                 = query;
+window.firestoreWhere                 = where;
+window.firestoreOrderBy               = orderBy;
+window.firestoreAddDoc                = addDoc;
+window.firestoreUpdateDoc             = updateDoc;
+window.firestoreDeleteDoc             = deleteDoc;
