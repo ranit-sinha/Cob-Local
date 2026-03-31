@@ -267,18 +267,21 @@ async function submitRegistration() {
     return;
   }
 
-  /* Generate secret token for this worker */
+  /* Generate secret token â€” stored in DB for reference, NOT used in photo path */
   var secretToken = generateToken();
 
-  /* STEP 2: Upload photo — path includes secret token for security */
+  /* STEP 2: Upload photo
+   * FIXED: Use simple stable path â€” profiles/{uid}/photo.webp
+   * No secret token in path. x-upsert header handles create-or-replace.
+   */
   var photoURL = "";
   if (photoData && photoData.startsWith("data:")) {
-    var photoPath = "profiles/" + uid + "/" + secretToken + "/photo.webp";
+    var photoPath = "profiles/" + uid + "/photo.webp";
     var uploaded = await window.supabaseUploadPhoto(photoPath, photoData, "image/webp");
     if (uploaded) photoURL = uploaded;
   }
 
-  /* STEP 3: Supabase insert — secret_token saved with worker row */
+  /* STEP 3: Supabase insert */
   var workerRow = {
     id:                uid,
     name:              document.getElementById("regName").value.trim(),
@@ -304,7 +307,7 @@ async function submitRegistration() {
     average_rating:    0,
     total_feedbacks:   0,
     created_at:        Date.now(),
-    secret_token:      secretToken
+    secret_token:      secretToken   /* stored in DB but not in storage path */
   };
 
   var sbKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0cWN5amtocmdtc3hmaHVlYm1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxNjgyODYsImV4cCI6MjA4OTc0NDI4Nn0.LWKcRLPjZAZqWjeHvlpECDUe7135v1_qZ2zKfwl3Uu0";
