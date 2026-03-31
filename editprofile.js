@@ -4,7 +4,32 @@ var editUserType   = null;
 var editWorkerData = null;
 var editHirerUid   = null;
 
+/*
+ * ROOT FIX: firebase-config.js loads as type="module" which is always
+ * deferred. This plain <script> runs before the module finishes, so
+ * window.firestoreGetDoc etc. are undefined at DOMContentLoaded time.
+ *
+ * Solution: poll until window.firestoreGetDoc exists, then proceed.
+ * waitForFirebase() resolves as soon as the module has exported everything.
+ */
+function waitForFirebase() {
+  return new Promise(function(resolve) {
+    if (window.firestoreGetDoc && window.firestoreSetDoc && window.supabaseGet) {
+      resolve();
+      return;
+    }
+    var interval = setInterval(function() {
+      if (window.firestoreGetDoc && window.firestoreSetDoc && window.supabaseGet) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 30);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async function() {
+  await waitForFirebase();
+
   var workerSession = localStorage.getItem("ctj_worker_session");
   var hirerSession  = localStorage.getItem("ctj_hirer_session");
   if (!workerSession && !hirerSession) { show("notLoggedIn"); return; }
@@ -43,29 +68,20 @@ async function loadWorkerEdit(workerId) {
   document.getElementById("editAvailable").checked       = !!editWorkerData.available;
   document.getElementById("editWhatsapp").checked        = !!editWorkerData.hasWhatsApp;
 
-  /* FIXED: The Aadhaar re-upload check was silently failing because
-     firebase-config.js had a syntax error (broken string in console.warn)
-     which prevented firestoreGetDoc from ever being exported to window.
-     Now that firebase-config.js is fixed, this will work correctly.
-     Added an extra null-guard so even if Firestore is somehow unavailable,
-     the rest of the edit page still loads fine.                          */
+  /* Check Aadhaar rejection status â€” now safe because waitForFirebase() ran */
   try {
-    if (window.firestoreGetDoc && window.firestoreDoc && window.firebaseDb) {
-      var aadhaarDoc = await window.firestoreGetDoc(
-        window.firestoreDoc(window.firebaseDb, "aadhaar_pending", workerId)
-      );
-      if (aadhaarDoc.exists() && aadhaarDoc.data().status === "rejected") {
-        var reuploadEl = document.getElementById("aadhaarReuploadGroup");
-        if (reuploadEl) reuploadEl.style.display = "block";
-      }
+    var aadhaarDoc = await window.firestoreGetDoc(
+      window.firestoreDoc(window.firebaseDb, "aadhaar_pending", workerId)
+    );
+    if (aadhaarDoc.exists() && aadhaarDoc.data().status === "rejected") {
+      document.getElementById("aadhaarReuploadGroup").style.display = "block";
     }
   } catch(err) {
     console.error("Aadhaar status check failed:", err);
-    /* Do NOT let this crash the rest of the page load */
   }
 
   renderEditSocialTags();
-  var bioEl = document.getElementById("editBio");
+  var bioEl   = document.getElementById("editBio");
   var countEl = document.getElementById("editBioCount");
   countEl.textContent = bioEl.value.length + " / 200";
   bioEl.addEventListener("input", function() { countEl.textContent = bioEl.value.length + " / 200"; });
