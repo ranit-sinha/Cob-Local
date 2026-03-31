@@ -1,8 +1,8 @@
 /* COBLOCAL -- EDITPROFILE.JS */
 
-var editUserType  = null;
+var editUserType   = null;
 var editWorkerData = null;
-var editHirerUid  = null;
+var editHirerUid   = null;
 
 document.addEventListener("DOMContentLoaded", async function() {
   var workerSession = localStorage.getItem("ctj_worker_session");
@@ -33,19 +33,26 @@ async function loadWorkerEdit(workerId) {
 
   var w = results[0];
   editWorkerData = workerFromSupabase(w);
-  window._editSocialLinks = editWorkerData.socialLinks ? editWorkerData.socialLinks.slice() : [];
+
+  /* Store secret token for secure upload path */
+  editWorkerData.secretToken = w.secret_token || "";
+
+  window._editSocialLinks = editWorkerData.socialLinks
+    ? editWorkerData.socialLinks.slice() : [];
   show("workerEditWrap");
 
   var photoEl = document.getElementById("editWorkerPhoto");
   if (editWorkerData.photoURL) {
-    photoEl.innerHTML = '<img src="' + editWorkerData.photoURL + '" style="width:100%;height:100%;object-fit:cover;">';
+    photoEl.innerHTML = '<img src="' + editWorkerData.photoURL
+      + '" style="width:100%;height:100%;object-fit:cover;">';
   } else {
     photoEl.textContent = editWorkerData.name.charAt(0).toUpperCase();
   }
 
   document.getElementById("editWorkerName").textContent  = editWorkerData.name;
   document.getElementById("editWorkerSkill").textContent = editWorkerData.subSkill
-    ? editWorkerData.skill + " | " + editWorkerData.subSkill : editWorkerData.skill;
+    ? editWorkerData.skill + " | " + editWorkerData.subSkill
+    : editWorkerData.skill;
   document.getElementById("editWorkerPhone").textContent = "+91 " + editWorkerData.phone;
   document.getElementById("editAddress").value           = editWorkerData.address || "";
   document.getElementById("editBio").value               = editWorkerData.bio || "";
@@ -55,7 +62,9 @@ async function loadWorkerEdit(workerId) {
 
   /* Check aadhaar status */
   try {
-    var aadhaarDoc = await window.firestoreGetDoc(window.firestoreDoc(window.firebaseDb, "aadhaar_pending", workerId));
+    var aadhaarDoc = await window.firestoreGetDoc(
+      window.firestoreDoc(window.firebaseDb, "aadhaar_pending", workerId)
+    );
     if (aadhaarDoc.exists() && aadhaarDoc.data().status === "rejected") {
       document.getElementById("aadhaarReuploadGroup").style.display = "block";
     }
@@ -89,22 +98,26 @@ function handleEditAadhaar(input) {
 
 function handleEditPhoto(input) {
   if (!input.files || !input.files[0]) return;
-  if (input.files[0].size > 2 * 1024 * 1024) { showToast("Photo must be under 2MB"); return; }
+  if (input.files[0].size > 2 * 1024 * 1024) {
+    showToast("Photo must be under 2MB");
+    return;
+  }
   var reader = new FileReader();
   reader.onload = function(e) {
     var img = new Image();
     img.onload = function() {
       var canvas = document.createElement("canvas");
-      var maxW = 400;
-      var scale = img.width > maxW ? maxW / img.width : 1;
-      canvas.width  = Math.round(img.width * scale);
+      var maxW   = 400;
+      var scale  = img.width > maxW ? maxW / img.width : 1;
+      canvas.width  = Math.round(img.width  * scale);
       canvas.height = Math.round(img.height * scale);
       canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
       var compressed = canvas.toDataURL("image/webp", 0.7);
       document.getElementById("editPhotoPreview").src = compressed;
       document.getElementById("editPhotoPreview").style.display = "block";
       document.getElementById("editPhotoPlaceholder").style.display = "none";
-      showToast("Photo ready (" + Math.round((compressed.length * 3) / 4 / 1024) + " KB)");
+      showToast("Photo ready ("
+        + Math.round((compressed.length * 3) / 4 / 1024) + " KB)");
     };
     img.src = e.target.result;
   };
@@ -123,27 +136,51 @@ async function saveWorkerProfile() {
 
   var photoURL = editWorkerData.photoURL || "";
 
-  /* Upload new photo if the preview is showing a freshly picked image (data: URL) */
-  if (preview && preview.style.display !== "none" && preview.src.startsWith("data:")) {
+  /* Only upload if user picked a NEW photo (data: URL means freshly picked) */
+  if (preview && preview.style.display !== "none"
+      && preview.src.startsWith("data:")) {
+
+    if (!editWorkerData.secretToken) {
+      showToast("Session error. Please log out and log in again.");
+      return;
+    }
+
     showToast("Uploading photo…");
-    var photoPath = "profiles/" + editWorkerData.id + "/photo.webp";
-    var uploaded  = await window.supabaseUploadPhoto(photoPath, preview.src, "image/webp");
+
+    /* Path includes secret token so only this worker can write to it */
+    var photoPath = "profiles/"
+      + editWorkerData.id + "/"
+      + editWorkerData.secretToken + "/photo.webp";
+
+    var uploaded = await window.supabaseUploadPhoto(
+      photoPath, preview.src, "image/webp"
+    );
+
     if (uploaded) {
-      photoURL = uploaded;   /* new URL with cache-buster — saved to DB */
+      photoURL = uploaded;
     } else {
       showToast("Photo upload failed. Please try again.");
-      return;               /* stop here — don't save stale data */
+      return;
     }
   }
 
   /* Upload new Aadhaar if provided */
   if (window._newAadhaarData) {
-    var aadhaarPath     = "aadhaar/" + editWorkerData.id + "/aadhaar.jpg";
-    var aadhaarUploaded = await window.supabaseUploadPhoto(aadhaarPath, window._newAadhaarData, "image/jpeg");
+    var aadhaarPath = "aadhaar/" + editWorkerData.id + "/aadhaar.jpg";
+    var aadhaarUploaded = await window.supabaseUploadPhoto(
+      aadhaarPath, window._newAadhaarData, "image/jpeg"
+    );
     if (aadhaarUploaded) {
       await window.firestoreSetDoc(
-        window.firestoreDoc(window.firebaseDb, "aadhaar_pending", editWorkerData.id),
-        { workerId: editWorkerData.id, aadhaarUrl: aadhaarUploaded, status: "pending", createdAt: Date.now() }
+        window.firestoreDoc(
+          window.firebaseDb, "aadhaar_pending", editWorkerData.id
+        ),
+        {
+          workerId:   editWorkerData.id,
+          aadhaarUrl: aadhaarUploaded,
+          status:     "pending",
+          createdAt:  Date.now()
+        }
       );
       window._newAadhaarData = null;
     }
@@ -172,7 +209,9 @@ async function saveWorkerProfile() {
 
 async function loadHirerEdit(uid) {
   try {
-    var hirerDoc = await window.firestoreGetDoc(window.firestoreDoc(window.firebaseDb, "hirers", uid));
+    var hirerDoc = await window.firestoreGetDoc(
+      window.firestoreDoc(window.firebaseDb, "hirers", uid)
+    );
     if (!hirerDoc.exists()) { show("notLoggedIn"); return; }
     var hirer = hirerDoc.data();
     editHirerUid = uid;
@@ -204,7 +243,8 @@ async function saveHirerProfile() {
     ok = false;
   }
   if (pw && pw.length < 6) {
-    document.getElementById("editHirerErrPw").textContent = "Password must be at least 6 characters";
+    document.getElementById("editHirerErrPw").textContent
+      = "Password must be at least 6 characters";
     ok = false;
   }
   if (pw && pw !== pw2) {
@@ -222,22 +262,27 @@ async function saveHirerProfile() {
     try {
       await window.firebaseAuth.currentUser.updatePassword(pw);
     } catch(err) {
-      document.getElementById("editHirerErr").textContent = "Could not update password. Please login again and retry.";
+      document.getElementById("editHirerErr").textContent
+        = "Could not update password. Please login again and retry.";
       return;
     }
   }
 
   showToast("Profile updated!");
-  setTimeout(function() { window.location.href = "hirerauth.html"; }, 1200);
+  setTimeout(function() {
+    window.location.href = "hirerauth.html";
+  }, 1200);
 }
 
 function toggleEditPw(inputId, iconId) {
   var input = document.getElementById(inputId);
   var icon  = document.getElementById(iconId);
   if (input.type === "password") {
-    input.type = "text";     icon.className = "fa-regular fa-eye-slash";
+    input.type = "text";
+    icon.className = "fa-regular fa-eye-slash";
   } else {
-    input.type = "password"; icon.className = "fa-regular fa-eye";
+    input.type = "password";
+    icon.className = "fa-regular fa-eye";
   }
 }
 
@@ -270,8 +315,11 @@ function renderEditSocialTags() {
     Other:     "fa-solid fa-link"
   };
   container.innerHTML = window._editSocialLinks.map(function(link, i) {
-    return '<span class="social-tag"><i class="' + (icons[link.platform] || "fa-solid fa-link") + '"></i> '
+    return '<span class="social-tag">'
+      + '<i class="' + (icons[link.platform] || "fa-solid fa-link") + '"></i> '
       + link.platform
-      + '<button type="button" class="social-tag-remove" onclick="removeEditSocialLink(' + i + ')">\u2715</button></span>';
+      + '<button type="button" class="social-tag-remove" '
+      + 'onclick="removeEditSocialLink(' + i + ')">\u2715</button>'
+      + '</span>';
   }).join("");
 }
