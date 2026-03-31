@@ -22,7 +22,6 @@ async function loadWorkerEdit(workerId) {
   if (!results || results.length === 0) { show("notLoggedIn"); return; }
   var w = results[0];
   editWorkerData = workerFromSupabase(w);
-  /* Keep secret_token available but we no longer put it in the photo path */
   editWorkerData.secretToken = w.secret_token || null;
   window._editSocialLinks = editWorkerData.socialLinks ? editWorkerData.socialLinks.slice() : [];
   show("workerEditWrap");
@@ -44,12 +43,26 @@ async function loadWorkerEdit(workerId) {
   document.getElementById("editAvailable").checked       = !!editWorkerData.available;
   document.getElementById("editWhatsapp").checked        = !!editWorkerData.hasWhatsApp;
 
+  /* FIXED: The Aadhaar re-upload check was silently failing because
+     firebase-config.js had a syntax error (broken string in console.warn)
+     which prevented firestoreGetDoc from ever being exported to window.
+     Now that firebase-config.js is fixed, this will work correctly.
+     Added an extra null-guard so even if Firestore is somehow unavailable,
+     the rest of the edit page still loads fine.                          */
   try {
-    var aadhaarDoc = await window.firestoreGetDoc(window.firestoreDoc(window.firebaseDb, "aadhaar_pending", workerId));
-    if (aadhaarDoc.exists() && aadhaarDoc.data().status === "rejected") {
-      document.getElementById("aadhaarReuploadGroup").style.display = "block";
+    if (window.firestoreGetDoc && window.firestoreDoc && window.firebaseDb) {
+      var aadhaarDoc = await window.firestoreGetDoc(
+        window.firestoreDoc(window.firebaseDb, "aadhaar_pending", workerId)
+      );
+      if (aadhaarDoc.exists() && aadhaarDoc.data().status === "rejected") {
+        var reuploadEl = document.getElementById("aadhaarReuploadGroup");
+        if (reuploadEl) reuploadEl.style.display = "block";
+      }
     }
-  } catch(err) { console.error(err); }
+  } catch(err) {
+    console.error("Aadhaar status check failed:", err);
+    /* Do NOT let this crash the rest of the page load */
+  }
 
   renderEditSocialTags();
   var bioEl = document.getElementById("editBio");
@@ -109,17 +122,8 @@ async function saveWorkerProfile() {
   var photoURL = editWorkerData.photoURL || "";
 
   if (preview && preview.style.display !== "none" && preview.src.startsWith("data:")) {
-    showToast("Uploading photo");
-
-    /*
-     * FIXED: Use a simple, stable path profiles/{id}/photo.webp
-     * The secret token is no longer part of the path.
-     * Your app-level auth (localStorage session check) already prevents
-     * unauthorized edits, so the path doesn't need to be secret.
-     * This path is consistent across re-uploads, so upsert always works.
-     */
+    showToast("Uploading photo...");
     var photoPath = "profiles/" + editWorkerData.id + "/photo.webp";
-
     var uploaded = await window.supabaseUploadPhoto(photoPath, preview.src, "image/webp");
     if (uploaded) {
       photoURL = uploaded;
