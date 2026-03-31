@@ -82,6 +82,7 @@ async function supabaseDelete(table, id) {
 }
 
 async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
+  /* Convert base64 to blob */
   var byteString = atob(base64Data.split(',')[1]);
   var ab = new ArrayBuffer(byteString.length);
   var ia = new Uint8Array(ab);
@@ -90,23 +91,42 @@ async function supabaseUploadPhoto(filePath, base64Data, mimeType) {
   }
   var blob = new Blob([ab], { type: mimeType || 'image/webp' });
 
-  var res = await fetch(SUPABASE_URL + "/storage/v1/object/photos/" + filePath, {
+  var uploadUrl = SUPABASE_URL + "/storage/v1/object/photos/" + filePath;
+  var headers = {
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+    "Content-Type": mimeType || 'image/webp',
+    "x-upsert": "true"   /* upsert: create if missing, replace if exists */
+  };
+
+  /* Try PUT (upsert) first */
+  var res = await fetch(uploadUrl, {
     method: "PUT",
-    headers: {
-      "apikey": SUPABASE_ANON_KEY,
-      "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-      "Content-Type": mimeType || 'image/webp',
-      "x-upsert": "true"
-    },
+    headers: headers,
     body: blob
   });
 
+  /* If PUT fails (e.g. object doesn't exist yet and policy only allows INSERT), try POST */
+  if (!res.ok) {
+    var putStatus = res.status;
+    var putErr = await res.text();
+    console.warn("supabaseUploadPhoto PUT failed (" + putStatus + "):", putErr, "â€” trying POST...");
+
+    res = await fetch(uploadUrl, {
+      method: "POST",
+      headers: headers,
+      body: blob
+    });
+  }
+
   if (res.ok) {
+    /* Append cache-busting timestamp so the browser always loads the new photo */
     return SUPABASE_URL + "/storage/v1/object/public/photos/" + filePath + "?t=" + Date.now();
   }
 
+  var errStatus = res.status;
   var errText = await res.text();
-  console.error("supabaseUploadPhoto failed:", res.status, errText);
+  console.error("supabaseUploadPhoto failed completely:", errStatus, errText);
   return null;
 }
 
